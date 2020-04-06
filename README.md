@@ -18,6 +18,8 @@ Plan view            |  In action
 ### Goal
 In Bokhove et al. (2020), a numerical model (based on the equations for open channel flow under the kinematic assumption) is used to determine the relevant time and length scales prior to its construction as a physical model. That is, it is a crude and inexpensive model suitable for design purposes -- See the [Wetropolis' design and showcase Github page](https://github.com/obokhove/wetropolis20162020/) . **This page tracks the further development of the hydrodynamic modelling, both mathematically and numerically, with a view to conducting Wetropolis-inspired experiments in flood mitigation and control.**
 
+### Taster
+![floodwave](MATLAB/mov/vid_Nk_105_tmax_100.gif) 
 
 
 
