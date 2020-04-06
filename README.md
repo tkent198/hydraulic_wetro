@@ -2,7 +2,7 @@
 
 ## Hydraulic modelling of the flood and rainfall demonstrator Wetropolis
 
-This repository contains the source code and documentation on the numerical modelling of Wetropolis, and builds upon the design model of Bokhove et al. (2020). See also Onno Bokhove's [Wetropolis Github page](https://github.com/obokhove/wetropolis20162020/) which tells the story of Wetropolis from its inception to the present day.
+This repository contains the source code and documentation on the numerical modelling of Wetropolis, and builds upon the design model of Bokhove et al. (2020). See also Onno Bokhove's [Wetropolis' design and showcaseGithub page](https://github.com/obokhove/wetropolis20162020/) which tells the story of Wetropolis from its inception to the present day.
 
 ### Background
 Urban flooding is a major hazard worldwide, brought about by intense rainfall and often exacerbated by the built environment. The tabletop flood-demonstrator Wetropolis illustrates in an idealised modelling environment how extreme hydroclimatic events can cause flooding of a city due to peaks in river levels and groundwater following intense rainfall. It aims to conceptualise the science of flooding in a way that is accessible to and directly engages the public and also provides a scientific testbed for flood modelling, control and mitigation, and data assimilation. As such, it is useful to the scientist, industrial practitioner, and general public. 
@@ -16,7 +16,7 @@ Plan view            |  In action
 ![planview](figs/wetro_schematic.png)  |  ![Churchtown](figs/churchtown_HESS.png)
 
 ### Goal
-In Bpkhove et al. (2020), a numerical model (based on the equations for open channel flow under the kinematic assumption) is used to determine the relevant time and length scales prior to its construction as a physical model. That is, it is a crude and inexpensive model suitable for design purposes. **This page tracks the further development of the hydrodynamic modelling, both mathematically and numerically, with a view to conducting Wetropolis-inspired experiments in flood mitigation and control.**
+In Bokhove et al. (2020), a numerical model (based on the equations for open channel flow under the kinematic assumption) is used to determine the relevant time and length scales prior to its construction as a physical model. That is, it is a crude and inexpensive model suitable for design purposes -- See the [Wetropolis' design and showcase Github page](https://github.com/obokhove/wetropolis20162020/) . **This page tracks the further development of the hydrodynamic modelling, both mathematically and numerically, with a view to conducting Wetropolis-inspired experiments in flood mitigation and control.**
 
 
 
@@ -30,3 +30,6 @@ In Bpkhove et al. (2020), a numerical model (based on the equations for open cha
 ## Getting started
 ### Versions
 All of the source code is written in ...
+
+### Files overview
+...
