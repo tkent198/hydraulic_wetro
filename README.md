@@ -5,7 +5,7 @@
 This repository contains the source code and documentation on the numerical modelling of Wetropolis, and builds upon the design model of Bokhove et al. (2020). See also Onno Bokhove's [Wetropolis' Github page](https://github.com/obokhove/wetropolis20162020/) which tells the story of Wetropolis' design and outreach.
 
 ### Background
-Urban flooding is a major hazard worldwide, brought about by intense rainfall and often exacerbated by the built environment. The tabletop flood-demonstrator Wetropolis illustrates in an idealised modelling environment how extreme hydroclimatic events can cause flooding of a city due to peaks in river levels and groundwater following intense rainfall. It aims to conceptualise the science of flooding in a way that is accessible to and directly engages the public and also provides a scientific testbed for flood modelling, control and mitigation, and data assimilation. As such, it is useful to the scientist, industrial practitioner, and general public. 
+Urban flooding is a major hazard worldwide, brought about by intense rainfall and often exacerbated by the built environment. The tabletop flood-demonstrator Wetropolis illustrates in an idealised modelling environment how extreme hydroclimatic events can cause flooding of a city due to peaks in river levels and groundwater following intense rainfall. It aims to conceptualise the science of flooding in a way that is accessible to and directly engages the public and also provides a scientific testbed for flood modelling, control and mitigation, and data assimilation. As such, it is useful to the scientist, industrial practitioner, and general public.
 
 Physically, it comprises a winding river channel with parallel canal, a reservoir for water storage, a porous flow cell (analogous to a moor) with observable groundwater flow, and random rainfall, which may or may not lead to flooding in the idealised urban area of Wetropolis. The main river channel has three $\pi$--degree bends and one $(\pi/4)$--degree bend and is fed by water flowing into the domain at an upstream entry and leaving the domain at the downstream exit. The river bed is sloping down (uniformly with gradient 1 in 100); the river cross-sectional area is rectangular and uniform, and flanked on one side by a sloping flood plain outside of the urban area. Through the urban area, the rectangular channel is flanked on both sides by flat rectangular plains of higher elevation than the regular river channel, i.e., the cross-sectional area is T-shaped. Water enters the main channel in three places: (i) the upstream inflow, generally kept constant; (ii) overflow of a groundwater cell (or "moor") with porous material and fed by random daily rainfall; and (iii) overflow from a reservoir, also fed by random daily rainfall. The two overflows can be placed in three different spots along the river: upstream, midstream or downstream just before the city plain. The set-up is displayed in plan-view (below left) and in action at a meeting of the Churchtown Flood Action Group (below right).
 
@@ -16,10 +16,10 @@ Plan view            |  In action
 ![planview](figs/wetro_schematic.png)  |  ![Churchtown](figs/churchtown_HESS.png)
 
 ### Goal
-In Bokhove et al. (2020), a numerical model (based on the equations for open channel flow under the kinematic assumption) is used to determine the relevant time and length scales prior to its construction as a physical model. That is, it is a crude and inexpensive model suitable for design purposes -- See the [Wetropolis' design and showcase Github page](https://github.com/obokhove/wetropolis20162020/) . **This page tracks the further development of the hydrodynamic modelling, both mathematically and numerically, with a view to conducting Wetropolis-inspired experiments in flood mitigation and control.**
+In Bokhove et al. (2020), a numerical model (based on the equations for open channel flow under the kinematic assumption) is used to determine the relevant time and length scales prior to its construction as a physical model. That is, it is a crude and inexpensive model suitable for design purposes but unsuitable as a predictive model -- see the [Wetropolis' design and showcase Github page](https://github.com/obokhove/wetropolis20162020/) . **This page tracks the further development of the hydrodynamic modelling, both mathematically and numerically, with a view to conducting Wetropolis-inspired experiments in flood mitigation and control.**
 
 ### Taster
-![floodwave](MATLAB/mov/vid_Nk_105_tmax_100.gif) 
+![floodwave](MATLAB/mov/vid_Nk_105_tmax_100.gif)
 
 
 
@@ -30,8 +30,18 @@ In Bokhove et al. (2020), a numerical model (based on the equations for open cha
 ----
 
 ## Getting started
-### Versions
+### Add Language, versions, etc.
 All of the source code is written in ...
 
-### Files overview
-...
+## Files overview
+### MATLAB
+
+File name                   |  Summary
+:--------------------------:|:--------------------------:
+```AuNCP_wetro0```          |  Main run file
+```initial_cond_wetro```    | Func: Set up initial data (detailed within)
+```NCPflux_Au```            | Func: numerical flux calculation for space discretisation
+```xsec_Ahs```              | Func: cross-sections A as a function of h and s
+```xsec_hAs```              | Func: cross-sections h as a function of A and s
+```plots_xsecs```           | Plots cross-section functions
+```plot_xsec_hAs```         | Func: for plotting model output
