@@ -2,21 +2,22 @@
 
 ## Hydraulic modelling of the flood and rainfall demonstrator Wetropolis
 
-This repository contains the source code and documentation on the numerical modelling of Wetropolis. In Bokhove et al. (2020), a numerical model (based on the equations for open channel flow under the kinematic assumption) is used to determine the relevant time and length scales prior to its construction as a physical model. That is, it is a crude and inexpensive model suitable for design purposes but unsuitable as a predictive model -- see the [Wetropolis' design and showcase Github page](https://github.com/obokhove/wetropolis20162020/) . **This page tracks the further development of the hydrodynamic modelling, both mathematically and numerically, with a view to conducting Wetropolis-inspired experiments in flood mitigation and control.**
+
+This repository contains the source code and documentation on the numerical modelling of Wetropolis. In Bokhove et al. (2020), a numerical model (based on the equations for open channel flow under the kinematic assumption) is used to determine the relevant time and length scales prior to its construction as a physical model. That is, it is a crude and inexpensive model suitable for design purposes but unsuitable as a predictive model -- see the [Wetropolis' design and showcase Github page](https://github.com/obokhove/wetropolis20162020/) . **This page tracks the further development of the hydrodynamic modelling, both mathematically and numerically, with a view to conducting Wetropolis-inspired experiments in flood mitigation and control.** See [taster](#taster) for an illustrative movie.
+
 ---
-[Introduction](#introduction)
+## Contents
 
-* [Motivation](#motivation)
-* [Description](#A-brief-description-of-Wetropolis)
-* [Taster](#taster)
-* [References](#references)
+* [Introduction](#introduction)
+  * [Motivation](#motivation)
+  * [Description](#A-brief-description-of-Wetropolis)
+  * [Taster](#taster)
+  * [References](#references)
+* [Getting started](#getting-started)
+* [Code overview](#files--overview)
+  * [MATLAB](#matlab)
+  * [Python](#python)
 
-[Getting started](#getting-started)
-
-[Code overview](#files--overview)
-
-* [MATLAB](#matlab)
-* [Python](#python)
 ---
 
 ## Introduction
