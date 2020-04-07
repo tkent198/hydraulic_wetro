@@ -2,14 +2,12 @@
 
 ## Hydraulic modelling of the flood and rainfall demonstrator Wetropolis
 
-This repository contains the source code and documentation on the numerical modelling of Wetropolis, and builds upon the design model of Bokhove et al. (2020). See also Onno Bokhove's [Wetropolis' Github page](https://github.com/obokhove/wetropolis20162020/) which tells the story of Wetropolis' design and outreach.
-
+This repository contains the source code and documentation on the numerical modelling of Wetropolis. In Bokhove et al. (2020), a numerical model (based on the equations for open channel flow under the kinematic assumption) is used to determine the relevant time and length scales prior to its construction as a physical model. That is, it is a crude and inexpensive model suitable for design purposes but unsuitable as a predictive model -- see the [Wetropolis' design and showcase Github page](https://github.com/obokhove/wetropolis20162020/) . **This page tracks the further development of the hydrodynamic modelling, both mathematically and numerically, with a view to conducting Wetropolis-inspired experiments in flood mitigation and control.**
 ---
 [Introduction](#introduction)
 
 * [Motivation](#motivation)
 * [Description](#A-brief-description-of-Wetropolis)
-* [Goal](#goal)
 * [Taster](#taster)
 * [References](#references)
 
@@ -34,8 +32,6 @@ Plan view            |  In action
 :-------------------------:|:-------------------------:
 ![planview](figs/wetro_schematic.png)  |  ![Churchtown](figs/churchtown_HESS.png)
 
-### Goal
-In Bokhove et al. (2020), a numerical model (based on the equations for open channel flow under the kinematic assumption) is used to determine the relevant time and length scales prior to its construction as a physical model. That is, it is a crude and inexpensive model suitable for design purposes but unsuitable as a predictive model -- see the [Wetropolis' design and showcase Github page](https://github.com/obokhove/wetropolis20162020/) . **This page tracks the further development of the hydrodynamic modelling, both mathematically and numerically, with a view to conducting Wetropolis-inspired experiments in flood mitigation and control.**
 
 ### Taster
 *Preliminary test:* set up the channel geometry, initialised with a constant depth and kinematic velocity. The time-dependent left boundary sends a Gaussian pulse into the domain which travels down the channel and flood the plains and city area. This 'floodwave' passes out of the domain and river levels recede.
