@@ -4,7 +4,7 @@
 
 This repository contains the source code and documentation on the numerical modelling of Wetropolis, and builds upon the design model of Bokhove et al. (2020). See also Onno Bokhove's [Wetropolis' Github page](https://github.com/obokhove/wetropolis20162020/) which tells the story of Wetropolis' design and outreach.
 
-1. (Background)[Background]
+1. [Goal](###-Goal)
 
 ### Background
 Urban flooding is a major hazard worldwide, brought about by intense rainfall and often exacerbated by the built environment. The tabletop flood-demonstrator Wetropolis illustrates in an idealised modelling environment how extreme hydroclimatic events can cause flooding of a city due to peaks in river levels and groundwater following intense rainfall. It aims to conceptualise the science of flooding in a way that is accessible to and directly engages the public and also provides a scientific testbed for flood modelling, control and mitigation, and data assimilation. As such, it is useful to the scientist, industrial practitioner, and general public.
