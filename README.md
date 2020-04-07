@@ -49,7 +49,11 @@ Top-left: depth h as a function of the along-channel coordinate s. The red shade
 ### References
 * Bokhove, 0., Hicks, T., Zweers, W. and Kent, T. (2019): Wetropolis extreme rainfall and flood demonstrator: from mathematical design to outreach. *Accepted: HESS*. Preprint on [EarthArXiv](https://eartharxiv.org/59ymk/) and open review/discussion at [HESSD](https://www.hydrol-earth-syst-sci-discuss.net/hess-2019-191/).
 
-* ...
+* See also presentations on [OB's page](https://github.com/obokhove/wetropolis20162020/):
+  * [Oxford seminar 2016](https://github.com/obokhove/wetropolis20162020/blob/master/WetropolisO2016.pdf)
+  * [EGU 2018 talk](https://github.com/obokhove/wetropolis20162020/blob/master/wetropolisegu2018.pdf)
+  * [EGU 2019 poster](https://github.com/obokhove/wetropolis20162020/blob/master/WetropolisposterEGU2019p.pdf)
+
 ----
 
 ## Getting started
