@@ -16,7 +16,7 @@ This repository contains the source code and documentation on the numerical mode
 
 [Getting started](#getting-started)
 
-[Code overview](#getting-started)
+[Code overview](#files--overview)
 
 * [MATLAB](#matlab)
 * [Python](#python)
