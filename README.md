@@ -4,15 +4,20 @@
 
 This repository contains the source code and documentation on the numerical modelling of Wetropolis, and builds upon the design model of Bokhove et al. (2020). See also Onno Bokhove's [Wetropolis' Github page](https://github.com/obokhove/wetropolis20162020/) which tells the story of Wetropolis' design and outreach.
 
-**Page navigation**
+#### Page navigation
+
 [Introduction](#introduction)
+
 * [Motivation](#motivation)
 * [Description](#A-brief-description-of-Wetropolis)
 * [Goal](#goal)
 * [Taster](#taster)
 * [References](#references)
+
 [Getting started](#getting-started)
+
 [Code overview](#getting-started)
+
 * [MATLAB](#matlab)
 * [Python](#python)
 
