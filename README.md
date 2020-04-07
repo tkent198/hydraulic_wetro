@@ -3,9 +3,7 @@
 ## Hydraulic modelling of the flood and rainfall demonstrator Wetropolis
 
 This repository contains the source code and documentation on the numerical modelling of Wetropolis, and builds upon the design model of Bokhove et al. (2020). See also Onno Bokhove's [Wetropolis' Github page](https://github.com/obokhove/wetropolis20162020/) which tells the story of Wetropolis' design and outreach.
-
-#### Page navigation
-
+---
 [Introduction](#introduction)
 
 * [Motivation](#motivation)
@@ -20,6 +18,7 @@ This repository contains the source code and documentation on the numerical mode
 
 * [MATLAB](#matlab)
 * [Python](#python)
+---
 
 ## Introduction
 ### Motivation
