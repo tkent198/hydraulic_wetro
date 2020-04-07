@@ -19,7 +19,11 @@ Plan view            |  In action
 In Bokhove et al. (2020), a numerical model (based on the equations for open channel flow under the kinematic assumption) is used to determine the relevant time and length scales prior to its construction as a physical model. That is, it is a crude and inexpensive model suitable for design purposes but unsuitable as a predictive model -- see the [Wetropolis' design and showcase Github page](https://github.com/obokhove/wetropolis20162020/) . **This page tracks the further development of the hydrodynamic modelling, both mathematically and numerically, with a view to conducting Wetropolis-inspired experiments in flood mitigation and control.**
 
 ### Taster
+*Preliminary test:* set up the channel geometry, initialised with a constant depth and kinematic velocity. The time-dependent left boundary sends a Gaussian pulse into the domain which travels down the channel and flood the plains and city area. This 'floodwave' passes out of the domain and river levels recede.
+
 ![floodwave](MATLAB/mov/vid_Nk_105_tmax_100.gif)
+
+Top-left: depth h as a function of the along-channel coordinate s. The red shaded area denotes the city area. Top-right: Discharge Au along the channel s. Bottom-left: cross-sectional slice at s = 1.96 (floodplain; see vertical dashed line in top-left panel). Bottom-right: cross-sectional slice at s = 3.56 (city area; see second vertical dashed line in top-left panel).
 
 
 
