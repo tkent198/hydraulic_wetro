@@ -31,7 +31,7 @@ In Bokhove et al. (2020), a numerical model (based on the equations for open cha
 
 ## Getting started
 ### Add Language, versions, etc.
-All of the source code is written in ...
+The source code is written in ...
 
 ## Files overview
 ### MATLAB
@@ -45,3 +45,10 @@ File name                   |  Summary
 ```xsec_hAs```              | Func: cross-sections h as a function of A and s
 ```plots_xsecs```           | Plots cross-section functions
 ```plot_xsec_hAs```         | Func: for plotting model output
+
+
+### Python
+
+File name                   |  Summary
+:--------------------------:|:--------------------------:
+...                         | ...
