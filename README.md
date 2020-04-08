@@ -14,7 +14,7 @@ This repository contains the source code and documentation on the numerical mode
   * [Taster](#taster)
   * [References](#references)
 * [Getting started](#getting-started)
-* [Code overview](#files--overview)
+* [Code overview](#files-overview)
   * [MATLAB](#matlab)
   * [Python](#python)
 
