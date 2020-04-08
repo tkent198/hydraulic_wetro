@@ -1,0 +1,473 @@
+\documentclass [12pt,english]{article}
+
+\setlength{\oddsidemargin}{0in}
+\setlength{\evensidemargin}{0in}
+\setlength{\textwidth}{6.5in}
+\setlength{\textheight}{8in}
+\setlength{\topmargin}{0in}
+\setlength{\columnsep}{.25in}
+
+\usepackage{babel,amsmath,epsfig}
+\usepackage{url}
+
+\renewcommand{\baselinestretch}{1.5}
+\newcommand{\eqn}[1]{(\ref{eqn:#1})}
+\newcommand{\lab}[1]{\label{eqn:#1}}
+\def\eps{\epsilon} 
+\def\beq{\begin{equation}}   
+\def\eeq{\end{equation}}
+\def\ub{\bf u}
+\def\delt{\nabla^2}  \def\div{\nabla \cdot} \def\grad{\nabla} 
+\def\pp#1#2{ {\partial #1 \over \partial #2} } 
+\def\frac#1#2{ {#1\over#2}}
+\def\fracP#1#2{{{\partial#1}\over{\partial#2}}}
+\def\faf#1{\tilde{f_{#1}}}
+\def\saf#1{\tilde{s_{#1}}}
+\def\LF#1{\label{Fig.#1}}
+\def\RF#1{figure~\ref{Fig.#1}}
+\def\RFS#1#2{figures.\ref{Fig.#1}\ref{Fig.#2}}
+\def\bg#1{\mbox{\boldmath $#1$}}
+\def\wid{b}
+
+\hyphenation{geo-stro-phic}
+\hyphenation{semi-geo-stro-phic}
+\hyphenation{wa-ve-num-bers}
+\hyphenation{two-di-men-sio-nal}
+
+
+\begin{document}
+
+\title{\Large{\bf Fluid Dynamics --- Numerical Techniques}\\
+{\bf MATH5453M Numerical Exercise 3, 2016}\\
+{\small\bf Due date: December 9$^{\rm th}$ 2016}}
+\author{}
+\date{}
+
+\maketitle
+
+\vspace*{-2cm}\noindent
+{\em Keywords: diffusion equation,
+finite element method for linear and nonlinear diffusion equations,
+forward Euler \& Crank-Nicolson--scheme, groundwater modelling}. 
+Sources: Lecture Notes, Van der Kan et al. 2005, Morton and Mayers (2005), Internet.
+
+\section{Ground water model}
+
+Consider the width-averaged nonlinear diffusion equation modelling groundwater flow in a channel (Barenblatt 1996)
+\begin{align}
+\partial_t(w_v h_m)-\alpha g\partial_y(w_v h_m\partial_y h_m) =& {w_v R}/{(m_{por} \sigma_e)}\label{eqngroundw}
+\end{align}
+with groundwater level and variable $h_m=h_m(y,t)$ [$L$] above a horizontal datum $z=0$,
+channel width $w_v\approx 0.1{\rm m}$, acceleration of gravity $g=9.81{\rm m}/{\rm s}^2$ [$L/T^2$], derivative $\partial_y$
+in the along-channel direction $y\in[0,L_y]$ of a cell of length $L_y\approx 0.85{\rm m}$ [$L$], porosity $m_{por}\in[0.1,0.3]$,
+given rainfall $R=R(t)$ [$L/T$], the fraction of a pore $\sigma_e\in[0.5,1]$ that can be filled with water due to residual air, factor
+\begin{align}
+\alpha =& {k}/{(\nu m_{por}\sigma_e)}
+\end{align}
+with permeability $k\in[10^{-8},10^{-9}]{\rm m}^2$ [$L^2$] and viscosity of water $\nu=10^{-6}{\rm m}^2/{\rm s}$ [$L^2/T$].
+Boundary conditions are no flow at $y=L_y$ such that
+\begin{align}
+\partial_y h_m =& 0
+\end{align}
+and a Dirichlet condition at $y=0$, the other channel end, equal to the water level $h_{cm}(t)$ in a short outflow canal
+\begin{align}
+h_m(0,t) = h_{cm}(t).
+\end{align}
+The initial condition is $h_m(y,0)=h_{m0}(y)$. Make a sketch of the situation. % is given in Fig.~\RF{sketgrw}.
+
+The assumptions are that the groundwater level stays underground thus not inducing any surface run-off and that the
+flow is hydrostatic, with variations in the horizontal $y$--direction much longer than the vertical length scales.
+The canal level $h_{cm}(t)$ holds in a short channel of length $L_c$ between $-L_c<y<0$ with a weir at $y=-L_c$.
+The water level at the weir is critical, meaning that the flow speed $V_{c}=\sqrt{g h_c}$ is critical at $y=-L_c$.
+Assuming stationarity and by using Bernoulli's equation to link the speed and water depth $\{V_{cm},h_{cm}\}$ in the channel to that at the weir $\{V_c,h_c\}$ one obtains that
+\begin{align}
+g h_{cm}+\frac 12 V_{vm}^2 \approx g h_{cm} = g h_c+ \frac 12 V_c^2 =& \frac 32 g h_c,\\
+\Longrightarrow h_c = \frac 23 h_{cm}\quad\textrm{such~that}\quad Q_c = h_c V_c =& \sqrt{g}\max{(2 h_{cm}/3,0)}^{3/2},
+\end{align}
+assuming in addition that $V_{cm}^2\ll g h_{cm}\approx 0$ (see, e.g., Munson et al. 2005). 
+
+To obtain further insight, we rewrite and analyse \eqref{eqngroundw} next.
+The groundwater equation is clearly a continuity equation
+\begin{align}
+\partial_t(w_v h_m) +\partial_y(v h_m) =& \frac {w_v R}{m_{por}\sigma_e}
+\end{align}
+with the Darcy velocity
+\begin{align}
+  v =& -\frac {k g}{\nu m_{por} \sigma_e}\partial_y h_m  
+\end{align}
+and Darcy flux
+\begin{align}
+  Q \equiv w_v q \equiv &  w_v h_m v = -w_v h_m \frac {\kappa}{\mu}\partial_y p = -w_v h_m \frac {\kappa}{\nu\rho_0}\partial_y p\nonumber\\
+  \approx &  - \frac {\kappa g}{\nu}\partial_y h_m =-w_v h_m\frac {k g}{\nu m_{por}\sigma_e} \partial_y h_m
+  = -w_v \alpha g \partial_y\left(h_m^2 /2\right) 
+\end{align}
+with density of water $\rho_0$ and where we used the hydrostatic approximation and depth-integration
+to the free surface at $z=h_m$ by using $\partial_y p/\rho_0 \approx g\partial_y h_m$.
+The first and last term in \eqref{eqngroundw} display the water balance as follows, in the case that there is no $y$--dependence:
+\begin{align}
+\partial_t h_m =& {R}/{(m_{por}\sigma_e)}.
+\end{align}
+Hence, for $h_m$ zero initially and constant rainfall, we find $h_m = t R /(m_{por}\sigma_e)$
+showing that for $m_{por}=\sigma_e=1$ unity the groundwater level rises directly with rainfall,
+while it rises faster for general $m_{por}<1$ and $\sigma_e<1$, showing that the modelling of rainfall supply is consistent.
+Hence, the canal level is modelled by the outflow at $y=-L_c$ and inflow at $y=0$ as follows
+\begin{align}
+  L_c w_v \frac {{\rm d}h_{cm}}{{\rm d} t} =& m_{por}\sigma_e Q_0-Q_c \equiv w_v m_{por}\sigma_e\frac 12\alpha g \partial_y(h_m^2)|_{y=0} -w_v \sqrt{g} \max{\left(\frac 23 h_{cm}(t),0\right)}^{3/2}.\nonumber
+  \end{align}
+
+In summary, the complete mathematical groundwater model is:
+\begin{align}
+  \partial_t(w_v h_m)-\alpha g\partial_y(w_v h_m\partial_y h_m) =& \frac {w_v R}{m_{por} \sigma_e}\quad\textrm{in}\quad
+y\in[0,L_y]\label{eqngroundwsys}\\
+  \partial_y h_m =& 0\quad\textrm{at}\quad y=L_y\\
+  h_m(0,t) =& h_{cm}(t)\quad\textrm{at}\quad y=0\\
+  L_c w_v \frac {{\rm d}h_{cm}}{{\rm d} t} =&
+w_v m_{por}\frac {\sigma_e}{2}\alpha g \partial_y(h_m^2)|_{y=0}
+-w_v \sqrt{g} \max{\left(\frac 23 h_{cm}(t),0\right)}^{3/2}\label{eqngroundwsysc}
+\end{align}
+plus initial conditions for $h_m$ and $h_{cm}$.
+The multiplication by $m_{por}\sigma$ accommodates the flow out of the groundwater matrix into open space (?),
+while the $y$--derivative of $h_m^2$ has been taken rather than using  $h_m \partial_y h_m$ as
+otherwise a simple explicit discretisation with
+$h_m(0,0)=0$ is and $h_{cm}(0)=0$ will not lead to water flux into the canal. 
+It may be necessary to rewrite the equations such that they fit an appropriate finite element weak formulation.
+
+\section{Questions}
+
+\begin{enumerate}
+
+\item a) Write your own numerical program solving the heat equation $u_t=u_{xx}$ with Dirichlet boundary data as well as initial data using
+finite elements and using both the forward Euler and Crank-Nicolson time stepping scheme.
+You can, e.g., use the Thomas algorithm or the backslash in matlab.
+Provide all steps required in the finite element discretisation in detail on paper before you start programming.
+
+b) Argue how you can use the stability results for the finite difference scheme to find a time step for the finite element scheme.
+Van de Kan et al. (2005) provide more information on how to find the actual finite element stability criterion.
+
+c) Compare the numerical results of the two implementations, for $\theta=0,1/2$.
+Use, for example, a top-hat profile with unit value in the middle and zero values at the edges, and
+$\exp(-\alpha(x-x_m)^2)$ for sufficiently large $\alpha$ and $x_m=1/2$ lying within your domain.
+Compare your finite difference and finite element solutions.
+{\em Advanced: make a table of convergence using the $L^{\infty}$--error.}
+
+d) Numerically investigate the stability for $\theta=0,1/2$.
+Demonstrate this by succinctly showing your results in appropriate graphs.
+E.g., reproduce a relevant figure in Chapter 2 of Morton and Mayers (2005).
+
+\item Discretise  \eqref{eqngroundwsys}--\eqref{eqngroundwsysc} using an explicit finite element space and time discretisation
+that keeps the adjoint structure in tact.
+Provide all steps required in detail first. Use an explicit scheme.
+Use the time step criterion for the finite difference case to obtain and state a time step estimate.
+Show how the flux at $y=0$ arising after multiplication of the main partial differential equation by a test function and
+subsequent integration by parts can be eliminated. Should one take $h_m(0,t)=h_{cm}(t)$ in this calculation?
+
+\item Perform numerical simulations for the parameter values:
+\begin{align}
+  m_{por} =&  0.3,\quad \sigma_e = 0.8,\quad
+  L_y = 0.85{\rm m}\quad k = 10^{-8}{\rm m}^2,\quad w_v = 0.1{\rm m},\\ % \quad
+  R_{max} =& 0.000125{\rm m}/{\rm s},\quad L_c=0.05{\rm m}.
+\end{align}
+Start with $h_m(y,0)=0, h_{cm}(0)=0$.
+Model the system for $t=0,\dots,100$s and give output profiles of $h_{cm}, R(t)$ every $2$s and $h_m$ every $10$s.
+Demonstrate numerical convergence of your scheme for the solution at $t=100$s.
+Has the system reached steady state; what is the steady-state value of $h_{cm}$ and steady-state profile $h_{m}(y)$?
+Finally, vary the rain every $10$s, apply rain $1,2,4$ or $9$s out of $10$s or at fixed lower percentages for fixed $R_{max}$ 
+and display the changes in $h_m(y,t), h_{cm}(t), R(t)$ sensibly.
+Compare with your finite difference solver and interpret your results.
+{\em Hint:} Perhaps first implement the easier problem with $h_{cm}=0.07{\rm m}$ fixed and then add the canal equation. 
+
+\item {\em Advanced:} Use a Crank-Nicolson scheme instead to solve the above problem (in Firedrake). Detail your discretisation.
+Find a method to solve this nonlinear algebraic system (e.g., use Picard or Newton iteration).
+Implement it, demonstrate that the iteration converges and then
+compare it with the explicit (finite element and difference) discretisation.
+  
+
+\end{enumerate}
+
+
+\centerline{\bf References}
+
+\noindent
+Barenblatt, G.I. 1996: {\em Scaling, self-similarity, and intermediate asymptotics.} CUP. % Cambridge University Press.
+
+\noindent
+Bokhove, O., Zweers, W. 2016: Wetropolis design including groundwater cell. Photos and videos found at:
+{\em Resurging Flows} facebook page \url{https://www.facebook.com/resurging.flows}
+Presentation: \url{http://www1.maths.leeds.ac.uk/mathsforesees/projects.html}
+
+\noindent
+Van de Kan, J., Segal, A., van der Molen, F. (2005)
+{\em Numerical Methods in Scientific Computing}, VSSD, 279~pp.
+
+\noindent
+K.W. Morton and D.F. Mayers 2005:
+{\em Numerical solution of partial differential equations.} Cambridge University Press, 278~pp.
+
+\noindent
+B.R. Munson, D.F. Young and T.H. Okiishi 2005
+{\em Fundamentals of fluid mechanics}. Wiley. 
+
+\noindent
+Internet, e.g., for table of convergence, $L^{\infty}$--error, et cetera.
+
+%\end{document}
+
+\newpage
+
+\appendix
+
+\section{Solutions}
+
+Given Dirichlet boundary conditions $u(0,t)=u(L,t)=0$, multiply
+\begin{align}
+u_t=u_{xx}
+\end{align}
+with a test function $v=v(x)$ with $v(0)=v(L)=0$ and integrate (by parts) to obtain
+\begin{align}
+ \int_0^L v u_t\,{\rm d} x = -\int_0^{L} v_x u_{x}\,{\rm d} x,
+\end{align}
+in which the boundary terms cancel because $v(0)=v(L)=0$.
+This should be the weak formulation for Firedrake using $v$ and $u$ as a continuous Galerkin approximation
+with Dirichlet boundary conditions.
+For $L=1$, the initial conditions could be, e.g.,
+$u(x,0)= A\,e^{-\alpha|x-x_m|^2}$ with $x_m=L/2$ and suitable $\alpha$ such that $u(0,t)=u(L,t)\approx 0$;
+$u(x,0)=A\,x\,(1-x)$; or, $u(x,0)= A-\alpha(x-x_m)^2$ for $|x-x_m| \le \sqrt{A/\alpha}$.
+Using compact (linear) basis functions $v=\varphi_{i'}(x)$ with $i'=2,\dots,N$ and Galerkin expansions
+\begin{align}
+u(x,t)\approx u_h(x,t) =&  u_j(t)\varphi_j(x) = u_1\varphi_1+u_{N+1}\varphi_{N+1}+u_{j'}\varphi_{j'}
+= u_{j'}\varphi_{j'}, 
+\end{align}
+since $u_1=u_{N+1}=0$, we obtain
+\begin{align}
+ M_{i' j } \frac {{\rm d}u_{j}}{{\rm d}t} =& -S_{i' j} u_j
+ \Longrightarrow M_{i' j } \frac {{\rm d}u_{j'}}{{\rm d}t} = -S_{i' j'} u_{j'}\\
+ M_{i' j'} =& \int_0^L\varphi_{i'}\varphi_{j'} \,{\rm d} x\quad\textrm{and}\quad
+ S_{i' j'} = \int_0^L\partial_x \varphi_{i'}\partial_x\varphi_{j'} \,{\rm d} x,
+\end{align}
+with $(N-1)\times(N-1)$--matrices $M_{i' j'}$ and $S_{i'j'}$.
+Using the forward Euler and Crank-Nicolson time integration schemes,
+the weak Firedrake form and the matrix formulations become
+\begin{align}
+  \int_0^L v u^{n+1}\,{\rm d} x = \int_0^{L} v u^n-\Delta t v_x u^n_{x}\,{\rm d} x\\
+  \int_0^L v u^{n+1}+\frac 12 \Delta t \int_0^{L} v_x u^{n+1}_{x}\,{\rm d} x = \int_0^L v u^{n}-\frac 12 \Delta t \int_0^{L} v_x u^{n}_{x}\,{\rm d} x\\
+  M_{i' j' }  {u_{j'}}^{n+1} =& M_{i' j'} u_{j'}^{n}-\Delta t S_{i' j'} u_{j'}^n\\
+  \bigl( M_{i' j } +\frac 12 \Delta t S_{i' j'}\bigr) {u_{j'}}^{n+1}
+    =& \bigl(M_{i' j'} -\frac 12 \Delta t S_{i' j'}\bigr)u_{j'}^n,
+\end{align}
+for which the initial condition needs to be projected onto the finite element basis using $\int_0^L v u_h(x,0)\,{\rm d}x=\int_0^Lv u(x,0)\,{\rm d} x$
+yielding $u_{j'}(0) = M_{i'j'}^{-1}\int_0^L \varphi_{i'}u(x,0)\,{\rm d} x$.
+
+\vskip 12pt\noindent
+{\em Groundwater model FEM:}
+Multiplying \eqref{eqngroundwsys} times test function $q=q(y)$ with $h_m(0,t)=h_{cm}(t)$ yields, after integration by parts 
+and using that $\partial_y h_m=0$ at $y=L_y$ as well as $h_m(0,t)=h_{cm}(t)$, that
+\begin{align}
+\int_0^{L_y}  q \partial_t h_m+\alpha g h_m \partial_y q \partial_y h_m\, dy
++\underline{\alpha g q(0) h_m\partial_y h_m|_{y=0}} 
+=& \int_0^{L_y} \frac {q R}{m_{por} \sigma_e} \, dy\\
+L_c \frac {{\rm d}h_{cm}}{{\rm d} t}= m_{por}\sigma_e\underline{\alpha g \frac 12 \partial_y(h_m^2)|_{y=0}}- &
+\sqrt{g} \max{\left(\frac 23 h_{cm},0\right)}^{3/2},\\
+\underline{\alpha g \frac 12 \partial_y(h_m^2)|_{y=0}} = L_c \frac {1}{m_{por}\sigma_e}\frac {{\rm d}h_{cm}}{{\rm d} t}
++ & \frac {\sqrt{g}}{m_{por}\sigma_e} \max{\left(\frac 23 h_{cm},0\right)}^{3/2},
+\end{align}
+in which the underlined $\partial_y(h_m^2)|_{y=0}$ is eliminated between the two equations.
+These two equations are thus combined to obtain
+\begin{align}
+\int_0^{L_y}  q \partial_t h_m\, d y+\frac {q(0)  L_c}{m_{por}\sigma_e} \frac {{\rm d}h_{cm}}{{\rm d} t}
+=& \int_0^{L_y} -\alpha g h_m \partial_y q \partial_y h_m+\frac {q R}{m_{por} \sigma_e} \,dy \nonumber\\
+ & -\frac {q(0)}{m_{por}\sigma_e} \sqrt{g} \max{\left(\frac 23 h_{cm},0\right)}^{3/2}\\
+& \textrm{or}\nonumber\\
+\int_0^{L_y}  q \partial_t h_m\, d y+\frac {q(0)  L_c}{m_{por}\sigma_e} \frac {{\rm d}h_{m}(0,t)}{{\rm d} t}
+=& \int_0^{L_y} -\alpha g h_m \partial_y q \partial_y h_m+\frac {q R}{m_{por} \sigma_e} \,dy \nonumber\\
+ & -\frac {q(0)}{m_{por}\sigma_e} \sqrt{g} \max{\left(\frac 23 h_{m}(0,t),0\right)}^{3/2}
+\end{align}
+Note that $q$ remains unconstraint.
+Consider piecewise linear finite elements.
+The forward Euler and Crank-Nicolson time discretizations yield the (Firedrake) weak formulations
+\begin{align}
+&\int_0^{L_y}  q h_m^{n+1}\, d y +\frac {L_c h_{cm}^{n+1}}{m_{por}\sigma_e} = \int_0^{L_y} q h_m^{n}\, dy+\frac {L_c h_{cm}^{n}}{m_{por}\sigma_e}\nonumber\\
+&\qquad +\Delta t \int_0^{L_y} \left(-\alpha g h_m^n \, \partial_y q \partial_y h_m^n+\frac {q R^n}{m_{por} \sigma_e}\right)\, dy
+-\Delta t \frac {\sqrt{g}}{m_{por}\sigma_e} \max{\left(\frac 23 h^n_{cm},0\right)}^{3/2} \\
+%
+%
+& \int_0^{L_y}  q h_m^{n+1}\, d y +\frac {L_c h_{cm}^{n+1}}{m_{por}\sigma_e}
++\frac 12\Delta t \int_0^{L_y}\alpha g h_m^{n+1} \,\partial_y q \partial_y h_m^{n+1}\, dy
++\frac 12\Delta t \frac {\sqrt{g}}{m_{por}\sigma_e} \max{\left(\frac 23 h^{n+1}_{cm},0\right)}^{3/2}
+\nonumber\\
+&\quad = \int_0^{L_y} q h_m^{n}\, dy+\frac {L_c h_{cm}^{n}}{m_{por}\sigma_e}
++\frac 12\Delta t\int_0^{L_y}\left(-\alpha g h_m^n \partial_y q \partial_y h_m^n + \frac {q (R^n+R^{n+1})}{m_{por} \sigma_e}
+\right)\, dy\nonumber\\
+&\qquad\qquad -\frac 12\Delta t \frac {\sqrt{g}}{m_{por}\sigma_e} \max{\left(\frac 23 h^n_{cm},0\right)}^{3/2}.
+\end{align}
+Taking expansions $q=\varphi_i(x)$ and $h_m=h_j\varphi_j(x)$, for all $i,j=1,\dots,N_n$ with $N_n$ nodes, as well as $h_1=h_{cm}$
+the matrix form for the forward Euler case becomes
+\begin{align}
+& M_{ij} h_{j}^{n+1}+\frac {L_c h_{1}^{n+1}}{m_{por}\sigma_e}\delta_{i1} = M_{ij} h_j^{n}+\frac {L_c h_{1}^{n}}{m_{por}\sigma_e}\delta_{i1}+\Delta t b_{i}^n
+  -\Delta t \frac {\sqrt{g}}{m_{por}\sigma_e} \max{\left(\frac 23 h^n_{1},0\right)}^{3/2}\delta_{i1}\nonumber\\
+  & \qquad\qquad \textrm{for}\quad i=1,\dots,N_n\\
+M_{ij} = & \int_0^{L_y} \varphi_i\varphi_j  \, dy\quad\textrm{and}\quad
+b_{i}^n = \int_0^{L_y} \left(-\alpha g h_m^n \, \partial_y \varphi_{i} \partial_y h_m^n
++\frac {\varphi_i R^n}{m_{por} \sigma_e}\right)\, dy
+\end{align}
+with the Einstein summation convention used (here for $j$) and Kronecker delta symbol $\delta_{i1}=1$ when $i=1$ and $\delta_{i1}=0$ when $i\ne 0$.
+Note that for a piecewise linear finite element approximation the unknown vector
+$$(h_{cm}^{n+1},h_2^{n+1},\dots,h_j^{n+1},\dots,h_{N_n}^{n+1})^T$$
+includes the moor variables as well as the canal variable combined.
+
+This formulation yields (visually) the same answer as the finite difference calculations!
+
+\end{document}
+
+\newpage
+
+\appendix
+
+\section{How to write a computer program}
+
+Writing a computer program, e.g., in Matlab, Python or any other programming language,
+consists typically of the following steps. We will use writing a code for the explicit discretization
+of the diffusion equation as example.
+
+Hence, these steps are:
+\begin{itemize}
+\item Derive and write out the mathematics of the complete numerical algorithm, e.g., including
+discrete boundary and initial conditions, the mesh and its numbering, the
+equation updates for each unknown, using index notation or loops.
+\item Having completed this mathematical part, write a pseudo-code in words and/or block format;
+these blocks can in principle also become subroutines or classes or functions
+as this will improve the organization of the final program:
+\begin{description}
+\item{-} Introduce comments, starting with the title and goal of the program;
+\item{-} Define all parameters and variables required, clearly distinguishing these two, e.g.:
+$L, dx, Nx, Nt, dt, Tend, tmeasure, dtmeasure,mu=fac*dt/(dx*dx),tijd$
+(domain length, spatial step, number of grid cells, time step, final time, measurement time and increment, factor $fac$ for stability, time variable $tijd$),
+et cetera, and the arrays $u=u[j], unew[j]$ for $j=1,2,3,\dots,Nx+1$ et cetera;
+\item{-} Initialize some variables and plot the initial condition.
+\item{-} Create a for or while loop over time.
+\item{-} Create a for or while loop over space, or use the vector form in matlab, e.g.:\\
+$unew[2:Nx]= u[2:Nx]+mu*(u[1:Nx-1]-2*u[2:Nx]+u[3:Nx+1])$
+\item{-} Within these loops arange to plot at appropriate times.
+\end{description}
+Note that it is not a good idea to store $U^n_j$ as a matrix array as it will lead to an overflow of data.
+So do not store all the space--time data.
+\item The next step is to write a piece of code along these lines:
+\begin{description}
+\item{-} Test your code after every small stage/block by running it; deal with error messages, e.g.,
+explicitly check the range of your arrays, et cetera;
+\item{-} Initially plot after every time step, plot the new updates of the variables,
+and just run your code for a few time steps to see whether matters behave appropriately or blow up;
+\item{-} Verify your code against exact solutions, other people's solutions,
+solutions using a different method/program (as in our exercise),
+graphs in books, and/or high-resolution runs.
+\end{description}
+\end{itemize}
+
+
+%\newpage
+\appendix
+
+\section{Remarks and/or common mistakes}
+
+%\subsection{Table of Convergence}
+
+A table of convergence can be used to determine and/or confirm the formal
+order of convergence of your numerical scheme by simulations.
+Consider the case with a variable $u(x,t)$ and initial condition $u_0(x,0)$,
+and simulate to a final time $t=T$ with a fixed spatial grid of size $\Delta x$ and (fixed) time step $\Delta t$.
+The easiest thing to do is to pick a time $t_c<T$ at which the solution has sufficient spatial structure
+when one checks the convergence in space and still has sufficient temporal structure when (also) investigating
+the convergence in time.
+Denote the numerical solution at this time $t_c$:
+by $U_j$ or $U_j^{n_c}$ and the exact or a very high resolution solution by $u(x,t_c)$.
+Here $x_j=(j-1)\Delta x$ is the coarse grid position one starts with $j=1$.
+Denote the fine grid positions by $x_{j'}=(j'-1)\Delta x'$,
+i.e., we used two different meshes with two different mesh sizes.
+
+Remarks:
+\begin{itemize}
+\item Choosing a final decayed state with $u(x,t_c=T)\approx 0$ is therefore not appropriate.
+\item Define the norms you are using clearly and in mathematical terms, not as
+some internal function in some programming language.
+That is the $L^{\infty}$--error is:
+\begin{align}
+L_{\infty} = max_{j}(|U_j^{n_c}-u(x_j,t_c)|),
+\end{align}
+which is trivial to compute by looping over all grid points.
+In case you only have a refined solution, either take care that the fine grid also includes the course grid position
+$x_j$ or interpolate the solution between the appropriate positions $x_{j'}\le x_j\le x_{j'+1}$ (noting that $j$ and $j'$ concern
+indices on different grids).
+Make a ``continuum'' numerical solution denoted by $U(x,t)$ (e.g., by interpolation).
+The $L_2$--error is, using indexing $j=1,\dots,N_x+1$ and a numerical integral approximation
+for the integral:
+\begin{align}
+L_{2}=& \sqrt{\frac 1L \int_0^L \,(U(x,t_c)-u(x,t_c))^2{\rm d}x}\nonumber\\
+\approx & \frac {1}{\sqrt{L}}\sqrt{\bigl(\frac 12(U_0-u(0,t_c))^2+\frac 12(U_{N_x}-u(L,t_c))^2+\sum_{j=2}^{N}(U_j^{n_c}-u(x_j,t_c))^2\bigr)\Delta x}.
+\end{align}
+Even a lousy integral approximation tends to suffice to demonstrate convergence. i.e.,
+it is usually not worth spending time on accurate integration routines to determine these norms.
+\item When a numerical method is second order, the error scales like $(\Delta x)^2$, i.e.
+\begin{align}
+Error = C (\Delta x)^2
+\end{align}
+for some constant $C$ and for some norm.
+So when the resolution is doubled, the error becomes $Error=C(\Delta x)^2/4$ et cetera.
+{\em This means that the error should in principle go down by a factor of four.
+So for $\Delta x$ smaller and smaller this convergence should be obeyed and observed by you.}
+If this is not the case something is wrong: your time step was not sufficiently small
+and one is measuring the temporal error instead, there is still a bug, the measurement time $t_c$ is
+inappropriate, or the boundary conditions are implemented with another order, or something else to be
+determined by you. 
+\item It is therefore easiest to use regular refinements, e.g., with mesh sizes of
+$\Delta x, \Delta x/2, \Delta x/4, \Delta x/8$;
+but do take care that when a high resolution solution is used as pseudo-exact solution,
+its mesh size is sufficiently smaller than the smallest mesh size of the numerical test solutions.
+\item When the order of the scheme is unknown one can assume $Error=C(\Delta x)^{\gamma}$ at first and determine the exponent $\gamma$,
+using logarithmic plots.
+\item Graphs should have labels of appropriate size and should be readable.
+\item As requested and required for your own sake, the mathematics of the algorithm should be worked out on paper first in detail.
+Code is not acceptable as explanation of the algorithm.
+The indexing of the grid  should be clearly indicated.
+The treatment and adaptation of the main algorithm at the boundary points should be clearly explained
+in terms of mathematical formulas.
+\item There are alternative ways of considering the convergence without having an exact or fine numerical solution.
+Assume one has the numerical solutions at four resolutions $h=\Delta x,\Delta x/2,\Delta x/4,\Delta x/8$.
+Denote these by $u_h,u_{h/2},u_{h/4}, u_{h/8}$. Assume an error solution Ansatz of the form $C(\Delta x)^2$
+Consider the ratio
+\begin{align}
+\frac {h^2-(h/2)^2}{(h/4)^2-(h/8)^2} = \frac {(||u_{h/8}-u_{h}||-||u_{h/8}-u_{h/2}||)}{(||u_{h/8}-u_{h/2}||-||u_{h/8}-u_{h/4}||)}
+\end{align}
+for some norm $||\cdot||$ and analyse this using the error Ansatz. This is called Richardson's extrapolation.
+Do the same for an error Ansatz with unknown exponent $\gamma$.
+\item Something similar can be done to verify convergence in time, using refinements for of the time step $\Delta t$.
+\item It is advisable to make a routine such that one can plot the solutions
+at desired times specified before the time loop.
+\item Mention your name in the (Matlab) codes you submit. Also submit the codes used to calculate the tables of convergence
+and the plotting. These should be part of your programs.
+\end{itemize}
+
+
+\end{document}
+  
+\newpage
+\centerline{\bf References}
+
+
+\noindent
+Internet.
+
+\noindent
+
+
+
+\begin{figure}
+\centerline{
+\includegraphics[width=0.5\textwidth,height=0.4\textwidth]{volcanicdike3.pdf}
+}
+\caption{Photopgraph of the groundwater cell in Wetropolis and sketch of the set-up with the variables defined.}
+\LF{sketgrw}
+\end{figure}
+
+\centerline{\em Onno Bokhove, October 2016.}
+
+\end{document}
+
