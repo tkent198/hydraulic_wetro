@@ -56,24 +56,33 @@ Top-left: depth h as a function of the along-channel coordinate s. The red shade
 
 ## Getting started
 ### Add Language, versions, etc.
-The source code is written in ...
+* MATLAB '9.4.0.813654 (R2018a)'
+* Python '3.7.4' with:
+  * Numpy '1.17.2'
+  * Matplotlib '3.1.1'
 
 ## Files overview
 ### MATLAB
 
 File name                   |  Summary
 :--------------------------:|:--------------------------:
-```AuNCP_wetro0```          |  Main run file
-```initial_cond_wetro```    | Func: Set up initial data (detailed within)
-```NCPflux_Au```            | Func: numerical flux calculation for space discretisation
-```xsec_Ahs```              | Func: cross-sections A as a function of h and s
-```xsec_hAs```              | Func: cross-sections h as a function of A and s
-```plots_xsecs```           | Plots cross-section functions
-```plot_xsec_hAs```         | Func: for plotting model output
+```AuNCP_wetro0.m```          |  Main run script
+```initial_cond_wetro.m```    | Func: Set up initial data (detailed within)
+```NCPflux_Au.m```            | Func: numerical flux calculation for space discretisation
+```xsec_Ahs.m```              | Func: cross-sections A as a function of h and s
+```xsec_hAs.m```              | Func: cross-sections h as a function of A and s
+```plots_xsecs.m```           | Plots cross-section functions
+```plot_xsec_hAs.m```         | Func: for plotting model output
 
 
 ### Python
 
-File name                   |  Summary
+File/dir name                   |  Summary
 :--------------------------:|:--------------------------:
-...                         | ...
+```main_wetro_run.py```         | Main run script
+```init_cond.py```              | Initial condition functions
+```flux_function.py```          | Numerical flux calculation for space discretisation
+```cross_sections.py```         | Compute cross-sections h(A,s) and A(h,s)
+```plot_wetro.py```             | Plotting routine
+```/configs```                  | Dir for config files
+```/configs/config#1.py``` etc. | Config file containing parameters
