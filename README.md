@@ -89,3 +89,11 @@ File/dir name                   |  Summary
 ```plot_wetro.py```             | Plotting routine
 ```/configs```                  | Dir for config files
 ```/configs/config#1.py``` etc. | Config file containing parameters
+
+
+## Preliminary simulations
+
+
+![test1](MATLAB/mov/wetro_Nk_100_Tend_1000.gif)
+
+
