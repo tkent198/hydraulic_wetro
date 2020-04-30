@@ -66,13 +66,15 @@ Top-left: depth h as a function of the along-channel coordinate s. The red shade
 
 File name                   |  Summary
 :--------------------------:|:--------------------------:
-```AuNCP_wetro0.m```          |  Main run script
+```AuNCP_wetro0.m```          |  Main run script for initial test case
 ```initial_cond_wetro.m```    | Func: Set up initial data (detailed within)
 ```NCPflux_Au.m```            | Func: numerical flux calculation for space discretisation
 ```xsec_Ahs.m```              | Func: cross-sections A as a function of h and s
 ```xsec_hAs.m```              | Func: cross-sections h as a function of A and s
 ```plots_xsecs.m```           | Plots cross-section functions
 ```plot_xsec_hAs.m```         | Func: for plotting model output
+```run_wetro_2016.m```	| New ver of OB's original ```tabletop2v2016.m``````run_wetro_2020.m```	| Run Wetropolis with updated St. Venant river system: first implementation working
+```run_wetro_2020v2.m``` | Run Wetropolis with updated St. Venant river system: improvements
 
 
 ### Python
