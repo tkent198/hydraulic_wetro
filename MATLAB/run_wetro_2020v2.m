@@ -729,7 +729,7 @@ while (tijd  <= Tend) % All simple explicit time stepping
         xlabel('h', 'fontsize',fs);
         ylabel('Q', 'fontsize',fs);
         axis([0.01 0.03 0.0001 0.0003]);
-        drawnow; pause(0.1);
+        drawnow; pause(0.001);
         
         if (VIDEO == 1)
             frame = getframe(mainfig);
