@@ -654,12 +654,13 @@ while (tijd  <= Tend) % All simple explicit time stepping
         
         figure(13);
         subplot(1,2,1);
-%         ntot = Tend/TimeUnit;
         histogram(nchisto, 'Normalization','pdf');
-        
+        xlabel('Rain / wd', 'fontsize',fs);
+        ylabel('Density', 'fontsize',fs);
         subplot(1,2,2);
         plot(h(nxLc1+2), U(2,nxLc1+2),'xk'); hold on;
-        
+        xlabel('h', 'fontsize',fs);
+        ylabel('Q', 'fontsize',fs);
         drawnow; pause(0.001);
         
         

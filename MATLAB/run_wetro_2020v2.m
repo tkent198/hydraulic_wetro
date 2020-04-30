@@ -16,15 +16,15 @@
 % > EnKF for river model?
 
 clear;
+nparaflag = 2; % 1 is Onno's original design case; 2 is Luke/Onno/real case of parameter choice'
+VIDEO = 0;
 %% Canal
-% (i) Canal: s=0,..., Lc3 (lock 3), s=Lc3, ..., Lc2 (lock 2), s=Lc2,..., Lc1 (lock 1 into river)
+% Canal: s=0,..., Lc3 (lock 3), s=Lc3, ..., Lc2 (lock 2), s=Lc2,..., Lc1 (lock 1 into river)
 % (a) Simple kinetic model with variables: h1=h1(t) in 1st, h2=h2(t) in 2nd section canal section
-% (b) Shallow water model 1D or 2D
-%
+% (b) Shallow water model 1D or 2D?
 % Solid wall at s=0.
 %
 %% Parameters
-nparaflag = 2; % 1 is Onno's original design case; 2 is Luke/Onno/real case of parameter choice'
 g = 9.81;          % m/s^2
 Lc3 = 1.724; % m distance to lock 3
 Lc2 = 3.608; % m distance to lock 2
@@ -37,13 +37,18 @@ Cf = (2/3)^(3/2);
 Pw3 = 0.0125;      % depth weir in canal section 3
 Pw2 = 0.0125;      % depth weir in canal section 2
 Pw1 = 0.01;        % depth weir in canal section 1
+canalmaxdepth = 0.02;
+Hcc3 = 0.06; % 0.04; % 0.06;    % dike height along canal segment 2, canal max depth 0.0175m before overflow in river
+Hcc2 = 0.04; % 0.04; % 0.06;    % dike height along canal segment 2, canal max depth 0.0175m before overflow in river
+Hcc1 = 0.021; % 0.022; % 0.032; % dike height along canal segment 1, canal max depth 0.0175m before overflow in river
+
 
 %% River channel
-% (ii) River: x=0...Lx; variables h=h(x,t)
+%
 % (a) simple river slope approximation: dh/dt	+ d Q(h)/dx = f
 % Q(h) = h (wr*h/(2*h+wr))^2/3 sqrt(-db/dx)/Cm (simple rectangular river profile)
 % wr*h/(2*h+wr) is area/wetted perimeter with wr width of river and h its depth
-% (b) shallow water equations 1D
+% (b) St Venant system (see TK Overleaf)
 %
 %% (a) kinematic model
 Lx = 4.211; % m
@@ -60,16 +65,14 @@ hr = 0*xx(1:Nx); % hr river depth defined as finite volumes, so one less than no
 Ar = wr*hr; % cross-sectional area for ractangular case
 Vr = 0*hr;
 bx = dmean*(Lx-xxm)/Lx; % sloping bed topography
-canalmaxdepth = 0.02;
-Hcc3 = 0.06; % 0.04; % 0.06;    % dike height along canal segment 2, canal max depth 0.0175m before overflow in river
-Hcc2 = 0.04; % 0.04; % 0.06;    % dike height along canal segment 2, canal max depth 0.0175m before overflow in river
-Hcc1 = 0.021; % 0.022; % 0.032; % dike height along canal segment 1, canal max depth 0.0175m before overflow in river
+
+%and canal
 Hcx = Hcc3*0.5*(1+sign(Lc3-xxm))+Hcc2*0.5*(1+sign(xxm-Lc3)).*(1+sign(Lc2-xxm))*0.5+Hcc1*0.5*(1+sign(xxm-Lc2));
 Hcxb = Hcx-canalmaxdepth; % Canal bottom topography (3 steps)
 %
 %
 %% (b) St Venant river moidelling
-%%%----- geometry  parameters ----%%%
+%%%----- channel cross-section geometry  parameters ----%%%
 geom.hr = 0.015; 
 geom.wr = 0.05; % m width main river channel
 geom.hf = 0.02; % m
@@ -79,15 +82,14 @@ geom.hc = geom.hr+geom.hf;
 geom.wf = 0.1;  % m width flood plain
 geom.wc = 0.1; 
 geom.tana = geom.hf/geom.wf;
-
+%%%----- other parameters ----%%%
 geom.g = 9.81;     % acceleration of gravity
 geom.Cm = 0.02;    % Manning coefficient
 geom.dbds = -0.01; % mean slope river bed
 
-
+%%%----- channel length parameters ----%%%
 chan.LR3 = 4.2; % total length of channel
 chan.LR3 = Lx; % total length of channel
-
 
 chan.LR1 = 3.7; % length upto city region
 chan.LR2 = 4.0; % length from end of city region
@@ -104,21 +106,20 @@ chan.tr = 50; % severity of transition
 %%%----- # of equations in system -----%%%
 Neq = 2; % U = (A, Au)
 
-%%%----- Set up grid -----%%%
+%%%----- Set up grid with curvilinear coord s -----%%%
 L=chan.LR3; %length of domain
 Nk=100; %number of gridcells (excluding ghost)
 Nf=Nk+1; %number of nodes
 Kk=L/Nk; %length of cell
 s=0:Kk:L;%node location
 sBC = [-Kk s L+Kk]; %node loc with ghosts
+ssm  = 0.5*(s(2:Nx+1)+s(1:Nx));% volume centre points (plotting)
 
 % locating floodplain/city
 index_fp = [find(s < chan.LR1) find(s > chan.LR2)];
 index_city = intersect(find(s > chan.LR1), find(s < chan.LR2));
 index_m = find(s > chan.s_m); 
 index_r = find(s > chan.s_r); 
-
-% cfl = 0.5; % CFL number for stable time-stepping
 
 % BOUNDARY CONDITIONS
 % Periodic BC = 1
@@ -129,13 +130,14 @@ BC = 3;
 % ----- Apply initial conditions ----- %
 [U0, B, h0] = initial_cond_wetro(s,Neq,Nk,geom,chan);
 
+%with ghosts
 U0 = [U0(:,1) U0 U0(:,end)];
 B = [B(1) B B(end)];
 h0 = [h0(1) h0 h0(end)];
 
 Z0 = B + h0;
 
-% Define system arrays with ghost cells for BCs
+% Define empty system arrays for allocation  -- with ghost cells for BCs
 Flux = zeros(Neq,Nk+1);
 S = zeros(Neq,Nk+2); % for source terms (friction, bed slope, and rain)
 UU = zeros(Neq,Nk+2);
@@ -146,11 +148,12 @@ Wp = zeros(1,Nk+2);
 Rh = zeros(1,Nk+2);
 dhdA = zeros(1,Nk+2);
 
+% take ICs
 U = U0;
 h = h0;
 
 %% Groundwater model (moor)
-% (iii) Moor water inflow in canal at s=Lv<Lc2 gam-fraction and river x=Lv (1-gam) -fraction with gam=gam(t) <=1
+% Moor water inflow in canal at s=Lv<Lc2 gam-fraction and river x=Lv (1-gam) -fraction with gam=gam(t) <=1
 %	Orthogonal to canal
 %       Option a) canal bottom coincide with Hele-Shaw moor bottom such that hm(1) = hc1
 % hm = hm(y,t) for y=0,...,Ly
@@ -179,10 +182,11 @@ mpor = 0.3;    % porosity moor
 nu = 10^(-6);  % viscosity water m^2/s
 kperm = 10^-8; % permeability
 alph = kperm/(mpor*nu*sigm);
+gam = 0.2;
 
 
 %% Reservoir
-% (iv) Reservoir Hele-Shaw cell with adjustable weir
+% Reservoir Hele-Shaw cell with adjustable weir
 %
 switch nparaflag
     case 1
@@ -199,7 +203,7 @@ switch nparaflag
         Lyy  = 0.293;    % length reservoir in m
 end
 Pwr  = 0.10; % weir height
-hres = 0;
+hres = 0; % initially empty res
 
 %% Moor, res, canal 1 coupling location
 % (v)  canal weirs at s=Lc1 and s=Lc2 critical flow
@@ -223,26 +227,26 @@ switch nparaflag
 end
 %
 TimeUnit = 10; % wd % 9 hrs from Kildwick till Armley times 3 is 27hrs; 12-20s across
-Train = Lc2*wc*0.01/(Ly*wv*Rain); % what is Train?
-gam = 0.2;
+Train = Lc2*wc*0.01/(Ly*wv*Rain); % TK: what is Train? unused (in case 2 below)
 %
 %
 Vrate = Ly*wv*Rain0*[1,2,4,8,18]*TimeUnit*1000; % flow rates in liters/TimeUnit (Eq. 18 in HESS)
-% pause;
-%
+
 
 Tend = 100*TimeUnit;
 dtmeas = 1.*TimeUnit;
 tmeas = dtmeas;
+tijd = 0;
 % nmeas = dtmeas/dt;
 %
 %
 %% Initialisation
-%
-%
+% - canals
+% - moor
+% - kinematic river
+
 figure(11); clf;
-tijd = 0;
-ini = 1
+ini = 1;
 switch ini
     case 1 % Mass check starting from absolute drought conditions and then it starts raining
         % canal sections
@@ -262,31 +266,54 @@ tijdo = tijd;
 %
 %
 %
-nc1 = 0;
-nc2 = 0;
-nc4 = 0;
-nc8 = 0;
-nc16 = 0;
+% nc1 = 0;
+% nc2 = 0;
+% nc4 = 0;
+% nc8 = 0;
+% nc16 = 0;
 nt = 0;
 nswitch = 0;
 nswitch2 = 1;
 tunit = 1;
 nrain = 4;
-R(1:Ny+1) = nrain*Rain0*ones(1,Ny+1);
-R2(1:Ny+1) = nrain*Rain0*ones(1,Ny+1);
+Rm(1:Ny+1) = nrain*Rain0*ones(1,Ny+1); %moor
+Rr(1:Ny+1) = nrain*Rain0*ones(1,Ny+1); %res
 nrainc = 1;
 ncc = 0;
+%% Video?
+
+if (VIDEO == 1)
+    % make directory path
+    outdirv = strcat(pwd, {'/'}, 'mov/');
+    outdirv = strjoin(outdirv);
+    
+    res = num2str(Nk);
+    Tmax = strrep(num2str(Tend), '.', '_');
+    
+    outnamev = sprintf('wetro_Nk=%s_Tend=%s',res,Tmax);
+    outnamev = strcat(outdirv,outnamev);
+    v = VideoWriter(outnamev);
+    v.FrameRate = 10;
+    v.Quality = 50;
+    open(v);
+    
+end
+
 %% Step forward in time...
+CFL = 0.35; % CFL number for stable time-stepping
 while (tijd  <= Tend) % All simple explicit time stepping
     % Randomised rainfall 
     % (3, 7, 5, 1)/16; [0,3]/16, [3,10]/16, [10,15]/16, [15,16]/16
     switch nrainc
         case 1
             while (tijd >= tunit)
+                
                 ncc = ncc+1;
                 tunit  = tunit+TimeUnit;
                 trand1 = rand;
                 trand2 = rand;
+                
+                %%% "galton board 1": RAINFALL AMOUNT
                 if (trand1 < 3/16)
                     nrain = 1; % Rain0
                 else
@@ -294,64 +321,73 @@ while (tijd  <= Tend) % All simple explicit time stepping
                         nrain = 2; % 2*Rain0
                     else
                         if (trand1 < 15/16)
-                            nrain = 4; % 3*Rain0
+                            nrain = 4; % 4*Rain0
                         else
-                            nrain = 9; % 4*Rain0
+                            nrain = 9; % 9*Rain0
                         end
                     end
                 end
+                
+                %%% "galton board 2": RAINFALL LOCATION
                 if (trand2 < 3/16)
                     nloc = 1; % Reservoir
-                    R(1:Ny+1) = 0*Rain0*ones(1,Ny+1);
-                    R2(1:Ny+1) = nrain*Rain0*ones(1,Ny+1);
+                    Rm(1:Ny+1) = 0*Rain0*ones(1,Ny+1); %moor
+                    Rr(1:Ny+1) = nrain*Rain0*ones(1,Ny+1);%res
                     not = nrain;
                 else
                     if (trand2 < 10/16)
                         nloc = 2; % Moor and reservoir
-                        R(1:Ny+1) = nrain*Rain0*ones(1,Ny+1);
-                        R2(1:Ny+1) = nrain*Rain0*ones(1,Ny+1);
+                        Rm(1:Ny+1) = nrain*Rain0*ones(1,Ny+1); %moor
+                        Rr(1:Ny+1) = nrain*Rain0*ones(1,Ny+1); %res
                         not = 2*nrain;
                     else
                         if (trand2 < 15/16)
                             nloc = 3; % Moor
-                            R(1:Ny+1) = nrain*Rain0*ones(1,Ny+1);
-                            R2(1:Ny+1) = 0*Rain0*ones(1,Ny+1);
+                            Rm(1:Ny+1) = nrain*Rain0*ones(1,Ny+1); %moor
+                            Rr(1:Ny+1) = 0*Rain0*ones(1,Ny+1);%res
                             not = nrain;
                         else
                             nloc = 4; % No rain in catchment
-                            R(1:Ny+1) = 0*Rain0*ones(1,Ny+1);
-                            R2(1:Ny+1) = 0*Rain0*ones(1,Ny+1);
+                            Rm(1:Ny+1) = 0*Rain0*ones(1,Ny+1); %moor
+                            Rr(1:Ny+1) = 0*Rain0*ones(1,Ny+1); %res
                             not = 0;
                         end
                     end
                 end
-                switch not
-                    case 0
-                        nc1 = nc1+1;
-                    case 2
-                        nc2 = nc2+1;
-                    case 4
-                        nc4 = nc4+1;
-                    case 8
-                        nc8 = nc8+1;
-                    case 16
-                        nc16 = nc16+1;
-                end
+                
+%                 switch not
+%                     case 0
+%                         nc1 = nc1+1;
+%                     case 2
+%                         nc2 = nc2+1;
+%                     case 4
+%                         nc4 = nc4+1;
+%                     case 8
+%                         nc8 = nc8+1;
+%                     case 16
+%                         nc16 = nc16+1;
+%                 end
+                
                 nchisto(ncc) = not;
                 fprintf('tunit: %g nrain: %d noloc: %d not:%d\n',tunit,nrain,nloc,not);
+                
             end
+            
         case 2
+            
             if (tijd > Train)
-                R(1:Ny+1) = Rain0*ones(1,Ny+1);  % 1mm/s
-                R2(1:Ny+1) = Rain0*ones(1,Ny+1); % 1mm/s
+                Rm(1:Ny+1) = Rain0*ones(1,Ny+1);  % 1mm/s
+                Rr(1:Ny+1) = Rain0*ones(1,Ny+1); % 1mm/s
             else
-                R(1:Ny+1) = Rain0*ones(1,Ny+1);
-                R2(1:Ny+1) = Rain0*ones(1,Ny+1); % 1mm/s
+                Rm(1:Ny+1) = Rain0*ones(1,Ny+1);
+                Rr(1:Ny+1) = Rain0*ones(1,Ny+1); % 1mm/s
             end
+            
     end
     %%
     
-    %%%----- Determine hydraulic radius, h and dh/dA -----%%%
+    % River: determine hydraulic radius, h and dh/dA for time step restrictions
+    % and numerical flux 
     [h(1), dhdA(1)] = xsec_hAs(U(1,1),0.5*(-Kk+0),geom,chan);
     [h(Nk+2), dhdA(Nk+2)] = xsec_hAs(U(1,Nk+2),0.5*(L+L+Kk),geom,chan);
     [area(1), Wp(1), Rh(1)] = xsec_Ahs(h(1),0.5*(-Kk+0),geom,chan);
@@ -362,14 +398,18 @@ while (tijd  <= Tend) % All simple explicit time stepping
         [area(j), Wp(j), Rh(j)] = xsec_Ahs(h(j),0.5*(s(j-1)+s(j)),geom,chan);
     end
     
+    %moor
     hmg = max(0.5*(hm(3:Ny+1)+hm(2:Ny)+0.5*(hm(2:Ny)+hm(1:Ny-1))));
     hmg = max(hmg,hm(Ny)+hm(Ny+1));
-    Vr = (wr*hr(1:Nx)./(2*hr(1:Nx)+wr)).^(2/3)*sqrt(-dbdxmean)/Cm; % velocity
-    dtr = dx/max(abs(Vr)); %dt river
+    
+    %kinematic
+    Vr = (wr*hr(1:Nx)./(2*hr(1:Nx)+wr)).^(2/3)*sqrt(-dbdxmean)/Cm; % kinematic velocity
+    
+    dtr = dx/max(abs(Vr)); %dt kinematic river
     dtm = dy^2/(alph*g*max(hmg,0.001)); %dt moor?
-    dtAu = cfl*min(Kk./max(abs(U(2,:)./U(1,:) - sqrt(geom.g*U(1,:).*dhdA)),...
-        abs(U(2,:)./U(1,:) + sqrt(geom.g*U(1,:).*dhdA))));
-    dt = 0.35*min(dtr,min(dtm,dtAu)); % take min timestep CFL = 0.35
+    dtAu = min(Kk./max(abs(U(2,:)./U(1,:) - sqrt(geom.g*U(1,:).*dhdA)),...
+        abs(U(2,:)./U(1,:) + sqrt(geom.g*U(1,:).*dhdA)))); %dt st venant
+    dt = CFL*min(dtr,min(dtm,dtAu)); % take min timestep with CFL
     
     tijd = tijd+dt;
     
@@ -407,18 +447,18 @@ while (tijd  <= Tend) % All simple explicit time stepping
     hmo = hm;
     hm(1) = h3co; % Jan 2017: this is wrong needs correction h2co -> h3co
     % interior points
-    hm(2:Ny) = hmo(2:Ny)+num*alph*g*(0.5*(hmo(3:Ny+1)+hmo(2:Ny)).*(hmo(3:Ny+1)-hmo(2:Ny))-0.5*(hmo(2:Ny)+hmo(1:Ny-1)).*(hmo(2:Ny)-hmo(1:Ny-1)))+dt*R(2:Ny)/(mpor*sigme);
+    hm(2:Ny) = hmo(2:Ny)+num*alph*g*(0.5*(hmo(3:Ny+1)+hmo(2:Ny)).*(hmo(3:Ny+1)-hmo(2:Ny))-0.5*(hmo(2:Ny)+hmo(1:Ny-1)).*(hmo(2:Ny)-hmo(1:Ny-1)))+dt*Rm(2:Ny)/(mpor*sigme);
     % wall at last grid point so no flux
-    hm(Ny+1) = hmo(Ny+1)+num*alph*g*(hmo(Ny)+hmo(Ny+1))*(hmo(Ny)-hmo(Ny+1))+dt*R(Ny+1)/(mpor*sigme);
+    hm(Ny+1) = hmo(Ny+1)+num*alph*g*(hmo(Ny)+hmo(Ny+1))*(hmo(Ny)-hmo(Ny+1))+dt*Rm(Ny+1)/(mpor*sigme);
     
     %
     %% Update reservoir hres(t)
     %
     hreso = hres;
     Qresw = Cf*wres*sqrt(g)*max(hreso-Pwr,0)^(3/2);
-    hres = hreso+dt*R2(1)-(dt/(Lyy*wres))*Qresw;
+    hres = hreso+dt*Rr(1)-(dt/(Lyy*wres))*Qresw;
     %
-     %% Update river
+     %% Update river kinematic
 %     %
 %     Ar0 = hr0*wr; % in m hrofunc(tijd,wr);
 %     Aro = Ar;
@@ -521,8 +561,7 @@ while (tijd  <= Tend) % All simple explicit time stepping
     UU(2,nxLc1)= UU(2,nxLc1)+ (UU(2,nxLc1)/UU(1,nxLc1))*dt*nswitch2*Qc1/Kk; % canal 1 inflow
 %     
     %%%----- update arrays for A, Au and h -----%%%
-    U = UU;
-    
+    U = UU;    
     %ghosts
     h(1) = xsec_hAs(U(1,1),0.5*(-Kk+0),geom,chan);
     h(end) = xsec_hAs(U(1,end),0.5*(L+L+Kk),geom,chan);
@@ -531,7 +570,7 @@ while (tijd  <= Tend) % All simple explicit time stepping
         h(j) = xsec_hAs(U(1,j),0.5*(s(j-1)+s(j)),geom,chan);
     end
     
-    %% Plotting:
+    %% Live plotting at intervals:
     %
     % if (mod(nt,nmeas)==0)
     if (tijd >= tmeas)
@@ -546,40 +585,49 @@ while (tijd  <= Tend) % All simple explicit time stepping
         ct = index_city(5);
         
         % NOTE: legends are SLOW for live plotting
-        fs = 16; %fontsize
-        figure(11);
-        subplot(2,2,1);
+        fs = 14; %fontsize
+        mainfig = figure(111);
+        mainfig.WindowState = 'maximized';
+%         subplot(2,2,1);
+%         subplot(2,6,2); 
+        subplot(2,5,3);
         plot(tijd,h1c,'ok','linewidth',1); hold on;
         plot(tijd,h2c,'*c','linewidth',1); hold on;
         plot(tijd,h3c,'xb','linewidth',1); hold on;
         plot(tijd,hres/10,'*r','linewidth',1); hold on;
-%         legend({'Canal 1','Canal 2', 'Canal 3', 'Res/10'},'Location','southeast','fontsize',fs);
+%         legend({'Canal 1','Canal 2', 'Canal 3', 'Res/10'},'Location','northwest','fontsize',fs);
         ylim([0,0.025]);
         xlabel('t [s]','fontsize',fs);
-        ylabel('h_{1c}(t) (black), h_{3c}(t) (blue), h_{3c}(t) (cyan) h_{resr}(t)/10','linewidth',1); hold on;
+%         ylabel('h_{1c}(t) (black), h_{3c}(t) (blue), h_{3c}(t) (cyan) h_{resr}(t)/10','linewidth',1); hold on;
         ylabel('Water depth h [m]', 'fontsize',fs); hold on;
         
-        subplot(2,2,2);
-        plot([tijdo,tijd],[hro,h(2)],'b','linewidth',1); hold on; %s=0
-        plot([tijdo,tijd],[0.02,0.02],':r','linewidth',1); hold on; %h flood?
+%         subplot(2,2,2);
+%         subplot(2,6,4);
+        subplot(2,5,8);
+        plot([tijdo,tijd],[hro,h(1)],'b','linewidth',1); hold on; %s=0
         plot([tijdo,tijd],[hrLo,h(nxLc1+2)],'k','linewidth',1); hold on; %s=L_c1
+        plot([tijdo,tijd],[0.02,0.02],':r','linewidth',1); hold on; %h flood?
 %         axis([0 Tend 0 max(h2c)]);
 %         legend({'h(s=0,t)','h(s=L_{1c},t)'},'Location','southeast','fontsize',fs);
         ylim([0,0.025]);
         xlabel('t [s]', 'fontsize',fs);
-        ylabel('Water depth h [m]', 'fontsize',fs); hold on;
+        ylabel('River level h [m]', 'fontsize',fs); hold on;
         
-        subplot(2,2,3);
+%         subplot(2,2,3);
+%         subplot(2,6,3);
+        subplot(2,5,2);        
         plot(yy,hm,'-','linewidth',2);
 %         legend({'Groundwater level'},'Location','southeast','fontsize',fs);
         ylim([0,0.12]);
         xlabel('y [m]', 'fontsize',fs);
         ylabel('h_m(y,t) [m]', 'fontsize',fs);
         
-        subplot(2,2,4);
-        plot(tijd,R(1)/Rain0,'oc','linewidth',1); hold on;
-        plot(tijd,R2(1)/Rain0,'xb','linewidth',1); hold on;
-        plot(tijd,(R(1)+R2(1))/Rain0,'*r','linewidth',1); hold  on;
+%         subplot(2,2,4);
+%         subplot(2,6,1);
+        subplot(2,5,1);
+        plot(tijd,Rm(1)/Rain0,'oc','linewidth',1); hold on;
+        plot(tijd,Rr(1)/Rain0,'xb','linewidth',1); hold on;
+        plot(tijd,(Rm(1)+Rr(1))/Rain0,'*r','linewidth',1); hold  on;
 %         legend({'Moor','Res', 'Both'},'Location','northeast','fontsize',fs);
         ylim([0,18]);
         xlabel('t [s]', 'fontsize',fs);
@@ -610,8 +658,10 @@ while (tijd  <= Tend) % All simple explicit time stepping
 %         ylim([0,0.07]);
         %
         
-        fg = figure(114);
-        subplot(2,2,1); 
+%         fg = figure(114);
+%         subplot(2,2,1);
+%         subplot(2,6,[11 12]);
+        subplot(2,5,9);
         for k = 1:(length(s)-1)
             plot([s(k), s(k+1)],[h(k+1),h(k+1)],'b-'); hold on;
         end
@@ -624,45 +674,67 @@ while (tijd  <= Tend) % All simple explicit time stepping
             'r','FaceAlpha',0.1,'LineStyle','none');
         hold off;
 %         text(0.85*xmax,0.9*hmax,['t=',num2str(tn)]);
-        axis([0 L 0 0.04]);
-        xlabel('s','fontsize',14); ylabel('h(s,t)','fontsize',14);
+        axis([0 L 0.01 0.03]);
+        xlabel('s','fontsize',fs); ylabel('h(s,t)','fontsize',fs);
         title([]);
 
-        subplot(2,2,2);
+%         subplot(2,2,2);
+%         subplot(2,6,[5 6]);
+        subplot(2,5,10);
         for k = 1:(length(s)-1)
             plot([s(k), s(k+1)],[Au(k+1),Au(k+1)],'b-'); hold on;
         end
+        plot([chan.s_r, chan.s_r],[0,0.04],'r:'); hold on;
+        plot([chan.s_m, chan.s_m],[0,0.04],'r:'); hold on;
+        plot([Lc1, Lc1],[0,0.04],'r:'); hold on;
         hold off;
-        axis([0 L 0 5*max(U0(2,:))]);
-        xlabel('s','fontsize',14); ylabel('Au(s,t)','fontsize',14);
+        axis([0 L 0.0001 0.0004]);
+        xlabel('s','fontsize',fs); ylabel('Au(s,t)','fontsize',fs);
         title([]);
         
-        subplot(2,2,4);
+%         subplot(2,2,4);
+%         subplot(2,6,10);
+        subplot(2,5,7);
         [X,Y,Xc,Yc,~] = plot_xsec_hAs(A(ct+1),s(ct),geom,chan);
         plot(Xc,Yc,'k', 'Linewidth',2); hold on;
         fill(X,Y,'b','FaceAlpha',0.1); hold off;
-        text(Xc(end),0.5*geom.hr,['t=',num2str(tijd)],'fontsize',14,'HorizontalAlignment', 'right');
-        text(Xc(end),0.25*geom.hr,['s=',num2str(s(ct))],'fontsize',14,'HorizontalAlignment', 'right');
+        text(Xc(1)+0.01,0.9*Yc(1),['t=',num2str(tijd)],'fontsize',fs,'HorizontalAlignment', 'left');
+        text(Xc(1)+0.01,0.8*Yc(1),['s=',num2str(s(ct))],'fontsize',fs,'HorizontalAlignment', 'left');
+        axis([min(Xc) max(Xc) min(Yc) max(Yc)]);
         
-        subplot(2,2,3);
+%         subplot(2,2,3);
+%         subplot(2,6,9);
+        subplot(2,5,6);
         [X,Y,Xc,Yc,hc] = plot_xsec_hAs(A(fp+1),s(fp),geom,chan);
         plot(Xc,Yc,'k', 'Linewidth',2); hold on;
         fill(X,Y,'b','FaceAlpha',0.1); hold off;
-        text(Xc(end),0.5*geom.hr,['t=',num2str(tijd)],'fontsize',14,'HorizontalAlignment', 'right');
-        text(Xc(end),0.25*geom.hr,['s=',num2str(s(fp))],'fontsize',14,'HorizontalAlignment', 'right');
-%         set(gcf, 'Position',  [100, 100, 1000, 600])
+        text(Xc(1)+0.01,0.9*Yc(1),['t=',num2str(tijd)],'fontsize',fs,'HorizontalAlignment', 'left');
+        text(Xc(1)+0.01,0.8*Yc(1),['s=',num2str(s(fp))],'fontsize',fs,'HorizontalAlignment', 'left');
+        axis([min(Xc) max(Xc) min(Yc) max(Yc)]);
         
-        figure(13);
-        subplot(1,2,1);
+%         figure(13);
+%         subplot(1,2,1);
+%         subplot(2,6,7);
+        subplot(2,5,4);
 %         ntot = Tend/TimeUnit;
         histogram(nchisto, 'Normalization','pdf');
-        
-        subplot(1,2,2);
+        xlabel('Rain / wd', 'fontsize',fs);
+        ylabel('Density', 'fontsize',fs);
+        axis([0 20 0 0.4]);
+%         subplot(1,2,2);
+
+%         subplot(2,6,8);
+        subplot(2,5,5);
         plot(h(nxLc1+2), U(2,nxLc1+2),'xk'); hold on;
+        xlabel('h', 'fontsize',fs);
+        ylabel('Q', 'fontsize',fs);
+        axis([0.01 0.03 0.0001 0.0003]);
+        drawnow; pause(0.1);
         
-        drawnow; pause(0.001);
-        
-        
+        if (VIDEO == 1)
+            frame = getframe(mainfig);
+            writeVideo(v,frame);
+        end
 
         hro = h(1);
         hrLo = h(nxLc1+2);
@@ -670,6 +742,10 @@ while (tijd  <= Tend) % All simple explicit time stepping
         
     end
     
+end
+
+if (VIDEO == 1)
+    close(v);
 end
 % figure(13);
 % ntot = Tend/TimeUnit;
