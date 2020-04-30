@@ -73,7 +73,8 @@ File name                   |  Summary
 ```xsec_hAs.m```              | Func: cross-sections h as a function of A and s
 ```plots_xsecs.m```           | Plots cross-section functions
 ```plot_xsec_hAs.m```         | Func: for plotting model output
-```run_wetro_2016.m```	| New ver of OB's original ```tabletop2v2016.m``````run_wetro_2020.m```	| Run Wetropolis with updated St. Venant river system: first implementation working
+```run_wetro_2016.m```	| New ver of OB's original ```tabletop2v2016.m```
+```run_wetro_2020.m```	| Run Wetropolis with updated St. Venant river system: first implementation working
 ```run_wetro_2020v2.m``` | Run Wetropolis with updated St. Venant river system: improvements
 
 
@@ -81,7 +82,7 @@ File name                   |  Summary
 
 File/dir name                   |  Summary
 :--------------------------:|:--------------------------:
-```main_wetro_run.py```         | Main run script
+```main_wetro_run.py```         | Main run script for initial test case
 ```init_cond.py```              | Initial condition functions
 ```flux_function.py```          | Numerical flux calculation for space discretisation
 ```cross_sections.py```         | Compute cross-sections h(A,s) and A(h,s)
