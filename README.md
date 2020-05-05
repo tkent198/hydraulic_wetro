@@ -94,6 +94,6 @@ File/dir name                   |  Summary
 ## Preliminary simulations
 
 
-![test1](MATLAB/mov/wetro_Nk_100_Tend_1000.gif)
+![live_panel](MATLAB/mov/wetro2_Nk_100_Tend_1000.gif)
 
 
