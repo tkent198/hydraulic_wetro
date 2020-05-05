@@ -17,7 +17,8 @@
 
 clear;
 nparaflag = 2; % 1 is Onno's original design case; 2 is Luke/Onno/real case of parameter choice'
-VIDEO = 0;
+VIDEO = 1;
+
 %% Canal
 % Canal: s=0,..., Lc3 (lock 3), s=Lc3, ..., Lc2 (lock 2), s=Lc2,..., Lc1 (lock 1 into river)
 % (a) Simple kinetic model with variables: h1=h1(t) in 1st, h2=h2(t) in 2nd section canal section
@@ -230,7 +231,10 @@ TimeUnit = 10; % wd % 9 hrs from Kildwick till Armley times 3 is 27hrs; 12-20s a
 Train = Lc2*wc*0.01/(Ly*wv*Rain); % TK: what is Train? unused (in case 2 below)
 %
 %
-Vrate = Ly*wv*Rain0*[1,2,4,8,18]*TimeUnit*1000; % flow rates in liters/TimeUnit (Eq. 18 in HESS)
+Vrate = Ly*wv*Rain0*[1,2,4,8,18]*TimeUnit*1000; % flow rates in liters/TimeUnit (Eq. 18 in HESS?)
+
+rainfac = [0,1,2,4,8,9,18];
+rainpdf = [16,24,77,89,35,8,7]/256;
 
 
 Tend = 100*TimeUnit;
@@ -290,10 +294,10 @@ if (VIDEO == 1)
     res = num2str(Nk);
     Tmax = strrep(num2str(Tend), '.', '_');
     
-    outnamev = sprintf('wetro_Nk=%s_Tend=%s',res,Tmax);
+    outnamev = sprintf('wetro2_Nk=%s_Tend=%s',res,Tmax);
     outnamev = strcat(outdirv,outnamev);
     v = VideoWriter(outnamev);
-    v.FrameRate = 10;
+    v.FrameRate = 5;
     v.Quality = 50;
     open(v);
     
@@ -542,7 +546,7 @@ while (tijd  <= Tend) % All simple explicit time stepping
         UU(:,2:end-1) = U(:,2:end-1) - dt*(Pp(:,2:end) - Pm(:,1:end-1))./Kk + dt*S(:,2:end-1);
 
         % ghosts
-        UU(1,1) = U(1,2);
+        UU(1,1) = U0(1,1);
 %         UU(2,1) = U0(2,1)+0.00005*sin(tn/(4*pi)); % Au: sine wave
 %         UU(2,1) = U0(2,1) + 0.0004*exp(-((tijd-0.25*Tend).^2)/50); % Au: exp pulse
         UU(2,1) = U0(2,1);
@@ -584,152 +588,9 @@ while (tijd  <= Tend) % All simple explicit time stepping
         fp = index_fp(50);
         ct = index_city(5);
         
-        % NOTE: legends are SLOW for live plotting
-        fs = 14; %fontsize
         mainfig = figure(111);
         mainfig.WindowState = 'maximized';
-%         subplot(2,2,1);
-%         subplot(2,6,2); 
-        subplot(2,5,3);
-        plot(tijd,h1c,'ok','linewidth',1); hold on;
-        plot(tijd,h2c,'*c','linewidth',1); hold on;
-        plot(tijd,h3c,'xb','linewidth',1); hold on;
-        plot(tijd,hres/10,'*r','linewidth',1); hold on;
-%         legend({'Canal 1','Canal 2', 'Canal 3', 'Res/10'},'Location','northwest','fontsize',fs);
-        ylim([0,0.025]);
-        xlabel('t [s]','fontsize',fs);
-%         ylabel('h_{1c}(t) (black), h_{3c}(t) (blue), h_{3c}(t) (cyan) h_{resr}(t)/10','linewidth',1); hold on;
-        ylabel('Water depth h [m]', 'fontsize',fs); hold on;
-        
-%         subplot(2,2,2);
-%         subplot(2,6,4);
-        subplot(2,5,8);
-        plot([tijdo,tijd],[hro,h(1)],'b','linewidth',1); hold on; %s=0
-        plot([tijdo,tijd],[hrLo,h(nxLc1+2)],'k','linewidth',1); hold on; %s=L_c1
-        plot([tijdo,tijd],[0.02,0.02],':r','linewidth',1); hold on; %h flood?
-%         axis([0 Tend 0 max(h2c)]);
-%         legend({'h(s=0,t)','h(s=L_{1c},t)'},'Location','southeast','fontsize',fs);
-        ylim([0,0.025]);
-        xlabel('t [s]', 'fontsize',fs);
-        ylabel('River level h [m]', 'fontsize',fs); hold on;
-        
-%         subplot(2,2,3);
-%         subplot(2,6,3);
-        subplot(2,5,2);        
-        plot(yy,hm,'-','linewidth',2);
-%         legend({'Groundwater level'},'Location','southeast','fontsize',fs);
-        ylim([0,0.12]);
-        xlabel('y [m]', 'fontsize',fs);
-        ylabel('h_m(y,t) [m]', 'fontsize',fs);
-        
-%         subplot(2,2,4);
-%         subplot(2,6,1);
-        subplot(2,5,1);
-        plot(tijd,Rm(1)/Rain0,'oc','linewidth',1); hold on;
-        plot(tijd,Rr(1)/Rain0,'xb','linewidth',1); hold on;
-        plot(tijd,(Rm(1)+Rr(1))/Rain0,'*r','linewidth',1); hold  on;
-%         legend({'Moor','Res', 'Both'},'Location','northeast','fontsize',fs);
-        ylim([0,18]);
-        xlabel('t [s]', 'fontsize',fs);
-        ylabel('Rainfall factor', 'fontsize',fs);
-        %
-%         sgtitle(['Wetropolis flood and rainfall demonstrator: t = ',num2str(tijd),' s'])
-
-        %
-%         figure(14);
-%         %
-%         subplot(2,1,1);
-% %         plot(xxm,Vr/5,'-k','linewidth',2); hold on;
-%         plot(xxm,h(2:end-1),'-b','linewidth',2); hold off;
-%         xlabel('x (m)');
-%         ylabel('h_r(x,t) (blue), V_r(x,t)/5 (black)');
-%         ylim([0,0.025]);
-%         %
-%         subplot(2,1,2);
-%         plot(xxm,bx,'-k','linewidth',2); hold on % river topog
-%         plot(xxm,B(2:end-1),'-k','linewidth',2); hold on % river topog
-%         plot(xxm(1:nxLc1),Hcx(1:nxLc1),'-.r','linewidth',1);  hold on % canal berm?
-%         plot(xxm(1:nxLc1),Hcxb(1:nxLc1),'-.k','linewidth',2);  hold on %canal topog
-%         Hcxb12 = (Hcc3+h3c)*0.5*(1+sign(Lc3-xxm(1:nxLc1)))+(Hcc2+h2c)*0.5*(1+sign(xxm(1:nxLc1)-Lc3)).*(1+sign(Lc2-xxm(1:nxLc1)))*0.5+(Hcc1+h1c)*0.5*(1+sign(xxm(1:nxLc1)-Lc2))-canalmaxdepth;
-%         plot(xxm(1:nxLc1),Hcxb12(1:nxLc1),'-.b','linewidth',1);  hold on %canal depth?
-%         plot(xxm,B(2:end-1)+h(2:end-1),'-b','linewidth',2); hold off % river level
-%         xlabel('x [m]', 'fontsize',fs);
-%         ylabel('Height z [m]', 'fontsize',fs);
-%         ylim([0,0.07]);
-        %
-        
-%         fg = figure(114);
-%         subplot(2,2,1);
-%         subplot(2,6,[11 12]);
-        subplot(2,5,9);
-        for k = 1:(length(s)-1)
-            plot([s(k), s(k+1)],[h(k+1),h(k+1)],'b-'); hold on;
-        end
-        plot([chan.s_r, chan.s_r],[0,0.04],'r:'); hold on;
-        plot([chan.s_m, chan.s_m],[0,0.04],'r:'); hold on;
-        plot([Lc1, Lc1],[0,0.04],'r:'); hold on;
-        plot([s(fp), s(fp)],[0,0.04],'k:'); hold on;
-        plot([s(ct), s(ct)],[0,0.04],'k:'); hold on;
-        fill([chan.LR1, chan.LR2,chan.LR2,chan.LR1],[0,0,geom.hc,geom.hc],...
-            'r','FaceAlpha',0.1,'LineStyle','none');
-        hold off;
-%         text(0.85*xmax,0.9*hmax,['t=',num2str(tn)]);
-        axis([0 L 0.01 0.03]);
-        xlabel('s','fontsize',fs); ylabel('h(s,t)','fontsize',fs);
-        title([]);
-
-%         subplot(2,2,2);
-%         subplot(2,6,[5 6]);
-        subplot(2,5,10);
-        for k = 1:(length(s)-1)
-            plot([s(k), s(k+1)],[Au(k+1),Au(k+1)],'b-'); hold on;
-        end
-        plot([chan.s_r, chan.s_r],[0,0.04],'r:'); hold on;
-        plot([chan.s_m, chan.s_m],[0,0.04],'r:'); hold on;
-        plot([Lc1, Lc1],[0,0.04],'r:'); hold on;
-        hold off;
-        axis([0 L 0.0001 0.0004]);
-        xlabel('s','fontsize',fs); ylabel('Au(s,t)','fontsize',fs);
-        title([]);
-        
-%         subplot(2,2,4);
-%         subplot(2,6,10);
-        subplot(2,5,7);
-        [X,Y,Xc,Yc,~] = plot_xsec_hAs(A(ct+1),s(ct),geom,chan);
-        plot(Xc,Yc,'k', 'Linewidth',2); hold on;
-        fill(X,Y,'b','FaceAlpha',0.1); hold off;
-        text(Xc(1)+0.01,0.9*Yc(1),['t=',num2str(tijd)],'fontsize',fs,'HorizontalAlignment', 'left');
-        text(Xc(1)+0.01,0.8*Yc(1),['s=',num2str(s(ct))],'fontsize',fs,'HorizontalAlignment', 'left');
-        axis([min(Xc) max(Xc) min(Yc) max(Yc)]);
-        
-%         subplot(2,2,3);
-%         subplot(2,6,9);
-        subplot(2,5,6);
-        [X,Y,Xc,Yc,hc] = plot_xsec_hAs(A(fp+1),s(fp),geom,chan);
-        plot(Xc,Yc,'k', 'Linewidth',2); hold on;
-        fill(X,Y,'b','FaceAlpha',0.1); hold off;
-        text(Xc(1)+0.01,0.9*Yc(1),['t=',num2str(tijd)],'fontsize',fs,'HorizontalAlignment', 'left');
-        text(Xc(1)+0.01,0.8*Yc(1),['s=',num2str(s(fp))],'fontsize',fs,'HorizontalAlignment', 'left');
-        axis([min(Xc) max(Xc) min(Yc) max(Yc)]);
-        
-%         figure(13);
-%         subplot(1,2,1);
-%         subplot(2,6,7);
-        subplot(2,5,4);
-%         ntot = Tend/TimeUnit;
-        histogram(nchisto, 'Normalization','pdf');
-        xlabel('Rain / wd', 'fontsize',fs);
-        ylabel('Density', 'fontsize',fs);
-        axis([0 20 0 0.4]);
-%         subplot(1,2,2);
-
-%         subplot(2,6,8);
-        subplot(2,5,5);
-        plot(h(nxLc1+2), U(2,nxLc1+2),'xk'); hold on;
-        xlabel('h', 'fontsize',fs);
-        ylabel('Q', 'fontsize',fs);
-        axis([0.01 0.03 0.0001 0.0003]);
-        drawnow; pause(0.001);
+        live_plotting_panel;
         
         if (VIDEO == 1)
             frame = getframe(mainfig);
