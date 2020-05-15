@@ -1,7 +1,6 @@
 # hydraulic_wetro
 
-## Hydraulic modelling of the flood and rainfall demonstrator Wetropolis
-
+## Wetropolis rainfall and flood demonstrator:  hydraulic modelling, data assimilation, and control
 
 This repository contains the source code and documentation on the numerical modelling of Wetropolis. In Bokhove et al. (2020), a numerical model (based on the equations for open channel flow under the kinematic assumption) is used to determine the relevant time and length scales prior to its construction as a physical model -- see the [Wetropolis' design and showcase Github page](https://github.com/obokhove/wetropolis20162020/) for more info. The original numerical model is crude and inexpensive, suitable for design purposes but unsuitable as a predictive model. **This page tracks the further development of the hydrodynamic modelling, both mathematically and numerically, with a view to conducting Wetropolis-inspired experiments in flood mitigation and control.** See [taster](#taster) for an illustrative movie.
 
@@ -37,16 +36,16 @@ A working document with more background and theory, including the governing equa
 
 
 ### Taster
-*Preliminary test:* set up the channel geometry, initialised with a constant depth and kinematic velocity. The time-dependent left boundary sends a Gaussian pulse into the domain which travels down the channel and flood the plains and city area. This 'floodwave' passes out of the domain and river levels recede.
+*Preliminary test:* set up the channel geometry (see [pdf](Wetropolis_Au_model.pdf)), initialised with a constant depth and kinematic velocity. The time-dependent left boundary sends a Gaussian pulse into the domain which travels down the channel and floods the plains and city area. This 'floodwave' passes out of the domain and river levels recede. 
 
 ![floodwave](MATLAB/mov/vid_Nk_105_tmax_100.gif)
 
-Top-left: depth h as a function of the along-channel coordinate s. The red shaded area denotes the city area. Top-right: Discharge Au along the channel s. Bottom-left: cross-sectional slice at s = 1.96 (floodplain; see vertical dashed line in top-left panel). Bottom-right: cross-sectional slice at s = 3.56 (city area; see second vertical dashed line in top-left panel).
+Top-left: water depth h as a function of the along-channel coordinate s. The red shaded area denotes the city area. Top-right: Discharge Au along the channel s. Bottom-left: cross-sectional slice at s = 1.96 (floodplain; see vertical dashed line in top-left panel). Bottom-right: cross-sectional slice at s = 3.56 (city area; see second vertical dashed line in top-left panel). Time [s] is indicated in the bottom panels; recall one 'Wetropolis day' [wd] is 10s. Channel length L = 4.21m. Simulation details: space-FV/DGFEM discretisation (Nk=105 elements) -- more details [here](Wetropolis_Au_model.pdf) -- and simple explicit forward Euler in time; run script ```AuNCP_wetro0.m```.
 
 
 
 ### References
-* Bokhove, 0., Hicks, T., Zweers, W. and Kent, T. (2019): Wetropolis extreme rainfall and flood demonstrator: from mathematical design to outreach. *Accepted: HESS*. Preprint on [EarthArXiv](https://eartharxiv.org/59ymk/) and open review/discussion at [HESSD](https://www.hydrol-earth-syst-sci-discuss.net/hess-2019-191/).
+* Bokhove, O., Hicks, T., Zweers, W., and Kent, T. (2020): Wetropolis extreme rainfall and flood demonstrator: from mathematical design to outreach, *Hydrol. Earth Syst. Sci.*, 24, 2483–2503, [DOI](https://doi.org/10.5194/hess-24-2483-2020).
 
 * See also presentations on [OB's page](https://github.com/obokhove/wetropolis20162020/):
   * [Oxford seminar 2016](https://github.com/obokhove/wetropolis20162020/blob/master/WetropolisO2016.pdf)
@@ -92,9 +91,24 @@ File/dir name                   |  Summary
 ```/configs/config#1.py``` etc. | Config file containing parameters
 
 
-## Preliminary simulations
+## Preliminary simulations: fully-coupled Wetropolis
+First simulations of the St. Venant system for the river dynamics coupled to the other components of Wetropolis (see plan view above). Rainfall is supplied each wd at a random location (reservoir, moor, both, or nowhere) and rate (loosely-speaking 1, 2, 4, or 9s per wd). Separate reservoir and moor groundwater models describe the water level in these locations.The reservoir has an outflow directly into the river channel at s=0.932m, and the moor has an outflow into the river channel and the canal at s=2.038m. The canal runs parallel to the river channel and has 3 sections connected by weirs (locks) and the water level in each section is constant in space. The final canal section flows into the river channel in the city region (s=3.858m). Flooding occurs in the city region when the river levels exceed 0.02m. Initially, the moor, reservoir, and canal sections are dry, the river channel has constant depth with prescribed constant inflow at s=0.
 
+<div align="center">#### The Wetropolis 'live' dashboard </div>
 
 ![live_panel](MATLAB/mov/wetro2_Nk_100_Tend_1000.gif)
 
+Panel description: from top left to bottom right.
+* Rainfall amount (rate) as a function of time.
+* Sample pdf of daily rainfall (time-dependent bars). The theoretical pdf is denoted by the black markers.
+* River flow Au(s,t) along the channel s. The three vertical dotted lines correspond to the reservoir, moor, and canal inflows at s = 0.932m, 2.038m, and 3.858m, respectively.
+* The water level h_m in the moor, as a function spatial moor coordinate y and time t, determined by a groundwater (nonlinear diffusion) model. The time-dependent left boundary is coupled to the river and canal.  Right boundary: solid wall. Rainfall is spatially uniform. 
+* Canal and reservoir levels as a function of time. Note the spin-up from dry conditions of about 200s (20 wd).
+* Water depth h(s,t) along the channel s. The three vertical dotted lines correspond to the reservoir, moor, and canal inflows at s = 0.932m, 2.038m, and 3.858m, respectively. The red shaded are denotes the city region.
+* Stage-discharge (h-Q) relationship in the city region. Empirical data to fit a rating curve?
+* River level time series (black) in the city region downstream of the canal inflow. The blue line is the constant inflow at s=0. The threshold for flooding is 0.02m (red dotted line).
+* Cross-channel snapshots of river levels just downstream of the moor inflow (floodplain).
+* Cross-channel snapshots of river levels just downstream of the canal inflow (city).
 
+
+Simulation details: ```run_wetro_2020v2.m```. 
