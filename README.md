@@ -100,9 +100,9 @@ First simulations of the St. Venant system for the river dynamics coupled to the
 ![live_panel](MATLAB/mov/wetro2_Nk_100_Tend_1000.gif)
 
 Panel description: from top left to bottom right.
-* Rainfall amount (rate) as a function of time.
+* Rainfall amount (rate), as a function of time, in the reservoir (blue), moor (cyan), and both (res+moor; red). Possible amounts are (0,1,2,4,8,9,18) with probabilities given in the pdf.
 * Sample pdf of daily rainfall (time-dependent bars). The theoretical pdf is denoted by the black markers.
-* River flow Au(s,t) along the channel s. The three vertical dotted lines correspond to the reservoir, moor, and canal inflows at s = 0.932m, 2.038m, and 3.858m, respectively.
+* River flow Au(s,t) along the channel s. The three vertical dotted lines correspond to the reservoir, moor, and canal inflows at s = 0.932m, 2.038m, and 3.858m, respectively. Note the hydraulic jumps after the inflows.
 * The water level h_m in the moor, as a function spatial moor coordinate y and time t, determined by a groundwater (nonlinear diffusion) model. The time-dependent left boundary is coupled to the river and canal.  Right boundary: solid wall. Rainfall is spatially uniform. 
 * Canal and reservoir levels as a function of time. Note the spin-up from dry conditions of about 200s (20 wd).
 * Water depth h(s,t) along the channel s. The three vertical dotted lines correspond to the reservoir, moor, and canal inflows at s = 0.932m, 2.038m, and 3.858m, respectively. The red shaded are denotes the city region.
