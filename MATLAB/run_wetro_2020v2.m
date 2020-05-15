@@ -17,7 +17,7 @@
 
 clear;
 nparaflag = 2; % 1 is Onno's original design case; 2 is Luke/Onno/real case of parameter choice'
-VIDEO = 1;
+VIDEO = 0; % 0 to run without saving a vid, 1 for save.
 
 %% Canal
 % Canal: s=0,..., Lc3 (lock 3), s=Lc3, ..., Lc2 (lock 2), s=Lc2,..., Lc1 (lock 1 into river)
@@ -55,7 +55,8 @@ Hcc1 = 0.021; % 0.022; % 0.032; % dike height along canal segment 1, canal max d
 Lx = 4.211; % m
 dmean = 0.042; % 0.01*nfac; % was 0.04        % mean height difference across river bed in m
 dbdxmean = -dmean/Lx; % mean sloep river bed
-Cm = 0.02;            % Manning coefficient, see Table in Munson and ...; this is for glass
+Cm = 0.02;
+% Cm = 0.06; % Manning coefficient, see Table in Munson and or wiki
 wr = 0.05;            % width of square river bed
 Nx = 100;
 dx = Lx/Nx;
