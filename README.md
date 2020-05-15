@@ -94,7 +94,7 @@ File/dir name                   |  Summary
 ## Preliminary simulations: fully-coupled Wetropolis
 First simulations of the St. Venant system for the river dynamics coupled to the other components of Wetropolis (see plan view above). Rainfall is supplied each wd at a random location (reservoir, moor, both, or nowhere) and rate (loosely-speaking 1, 2, 4, or 9s per wd). Separate reservoir and moor groundwater models describe the water level in these locations.The reservoir has an outflow directly into the river channel at s=0.932m, and the moor has an outflow into the river channel and the canal at s=2.038m. The canal runs parallel to the river channel and has 3 sections connected by weirs (locks) and the water level in each section is constant in space. The final canal section flows into the river channel in the city region (s=3.858m). Flooding occurs in the city region when the river levels exceed 0.02m. Initially, the moor, reservoir, and canal sections are dry, the river channel has constant depth with prescribed constant inflow at s=0.
 
-<div align="center">#### The Wetropolis 'live' dashboard </div>
+<div align="center"><font size="+2"> <bf>The Wetropolis 'live' dashboard </bf> </font></div>
 
 ![live_panel](MATLAB/mov/wetro2_Nk_100_Tend_1000.gif)
 
