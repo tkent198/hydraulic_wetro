@@ -121,7 +121,7 @@ Panel description: from top left to bottom right.
 Simulation details: ```run_wetro_2020v2.m```. Video saved as ```MATLAB/mov/wetro2_Nk=100_Tend=1000.avi```.
 
 
-*Note:* moor and reservoir coupling in the code is actually inconsistent with physical set-up. The reservoir is coupled to the river channel only at s=0.932m; the moor is coupled to the river channel at s=2.038m and canal at s=0.932m (mathematically/numerically this is allowed, but makes little sense in reality -- unless a pipe carries partial outflow from the moor to the reservoir location!). Note also that the actual Wetropolis river channel has length L=5.2m.
+***Note:*** moor and reservoir coupling in the code is actually inconsistent with physical set-up. The reservoir is coupled to the river channel only at s=0.932m; the moor is coupled to the river channel at s=2.038m and canal at s=0.932m (mathematically/numerically this is allowed, but makes little sense in reality -- unless a pipe carries partial outflow from the moor to the reservoir location!). Note also that the actual Wetropolis river channel has length L=5.2m.
 
 #### Other comments
 * Ensuring inflow/outflow at boundaries. 
