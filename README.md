@@ -124,8 +124,11 @@ Simulation details: ```run_wetro_2020v2.m```. Video saved as ```MATLAB/mov/wetro
 ***Note:*** moor and reservoir coupling in the code is actually inconsistent with physical set-up. The reservoir is coupled to the river channel only at s=0.932m; the moor is coupled to the river channel at s=2.038m and canal at s=0.932m (mathematically/numerically this is allowed, but makes little sense in reality -- unless a pipe carries partial outflow instantaneously from the moor to the reservoir location!). Note also that the actual Wetropolis river channel has length L=5.2m.
 
 #### Other comments
-* Ensuring inflow/outflow at boundaries: ...
- 
+* On a basic flood control experiment: constrain river depth to be less than hT = 0.02m in city by, e.g., turning off reservoir outflow (i.e., raise the weir height from 0.01m so reservoir acts as storage buffer during high rainfall, then lower weir height as rainfall lessens). This could be implemented in a straightforward was as follows. 
+
+```If Rr(t) = 18r0,  then set reservoir weir height Pwr  = 0.02```
+
+* EnKF for river dynamics and parameter estimation (see, e.g., Liz Cooper's recent work). In practice many parameters are poorly understood (Manning coeff, inflow rate, portion of outflow to canal/river etc.). 
  
 ### Wetropolis: fully-coupled v2
 
@@ -146,7 +149,9 @@ Panel description: as above.
 ![live_panel3](MATLAB/mov/wetro4_Nk_100_Tend_1000.gif)
 
 Panel description: as above. 
+* The moor canal lies in y in [-0.1, 0] and has spatially uniform depth >>> simple ODE in time. Provides BC for the groundwater model. This canal has weir at y = -0.1 of height 0.2m; when depth exceeds this, fluid flows into the river channel via the weir relations.
+* Issue: bottom of the moor, canal and river channel coincide. In reality, they are stepped.
 
 
 #### Other comments
-
+* Ensuring inflow/outflow at boundaries: ...
