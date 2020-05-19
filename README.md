@@ -149,7 +149,7 @@ Panel description: as above.
 ![live_panel3](MATLAB/mov/wetro4_Nk_100_Tend_1000.gif)
 
 Panel description: as above. 
-* The moor canal lies in y in [-0.1, 0] and has spatially uniform depth >>> simple ODE in time. Provides BC for the groundwater model. This canal has weir at y = -0.1 of height 0.2m; when depth exceeds this, fluid flows into the river channel via the weir relations.
+* The moor canal lies in y in [-0.1, 0] and has spatially uniform depth >>> simple ODE in time (orange line). Provides BC for the groundwater model. This canal has weir at y = -0.1 of height 0.2m; when depth exceeds this, fluid flows into the river channel (yellow line; cross channel) via the weir relations.
 * Issue: bottom of the moor, canal and river channel coincide. In reality, they are stepped.
 
 
