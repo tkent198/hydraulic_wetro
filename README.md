@@ -16,7 +16,7 @@ This repository contains the source code and documentation on the numerical mode
 * [Code overview](#files-overview)
   * [MATLAB](#matlab)
   * [Python](#python)
-
+* [Preliminary simulations](##preliminary-simulations)
 ---
 
 ## Introduction
@@ -96,9 +96,12 @@ File/dir name                   |  Summary
 
 
 ## Preliminary simulations 
-### Fully-coupled Wetropolis
-First simulations of the St. Venant system for the river dynamics coupled to the other components of Wetropolis (see plan view above). Rainfall is supplied each wd at a random location (reservoir, moor, both, or nowhere) and rate (loosely-speaking 1, 2, 4, or 9s per wd). Separate reservoir and moor groundwater models describe the water level in these locations.The reservoir has an outflow directly into the river channel at s=0.932m, and the moor has an outflow into the river channel and the canal at s=2.038m. The canal runs parallel to the river channel and has 3 sections connected by weirs (locks) and the water level in each section is constant in space. The final canal section flows into the river channel in the city region (s=3.858m). Flooding occurs in the city region when the river levels exceed 0.02m. Initially, the moor, reservoir, and canal sections are dry, the river channel has constant depth with prescribed constant inflow at s=0.
+### Wetropolis: fully-coupled v1
 
+#### Summary
+First simulations of the St. Venant system for the river dynamics coupled to the other components of Wetropolis (see plan view above). Rainfall is supplied each wd at a random location (reservoir, moor, both, or nowhere) and rate (loosely-speaking 1, 2, 4, or 9s per wd). Separate reservoir and moor groundwater models describe the water level in these locations.The reservoir has an outflow directly into the river channel at s = s_res = 0.932m, and the moor has an outflow into the river channel and the canal at s = s_m = 2.038m *[see note below]* . The canal runs parallel to the river channel and has 3 sections connected by weirs (locks) and the water level in each section is constant in space. The final canal section flows into the river channel in the city region (s = s_c1 = 3.858m). Flooding occurs in the city region when the river levels exceed 0.02m. Initially, the moor, reservoir, and canal sections are dry, the river channel has constant depth with prescribed constant inflow at s=0.
+
+#### Plots
 <div align="center"> <bf>The Wetropolis 'live' dashboard </bf> </div>
 
 ![live_panel](MATLAB/mov/wetro2_Nk_100_Tend_1000.gif)
@@ -106,7 +109,7 @@ First simulations of the St. Venant system for the river dynamics coupled to the
 Panel description: from top left to bottom right.
 * Rainfall amount (rate), as a function of time, in the reservoir (blue), moor (cyan), and both (res+moor; red). Possible amounts are (0,1,2,4,8,9,18) with probabilities given in the pdf.
 * Sample pdf of daily rainfall (time-dependent bars). The theoretical pdf is denoted by the black markers.
-* River flow Au(s,t) along the channel s. The three vertical dotted lines correspond to the reservoir, moor, and canal inflows at s = 0.932m, 2.038m, and 3.858m, respectively. Note the hydraulic jumps after the inflows.
+* River flow Au(s,t) along the channel s. The three vertical dotted lines correspond to the reservoir, moor, and canal inflows at s = 0.932m, 2.038m, and 3.858m, respectively. Note the jumps after the inflows.
 * The water level h_m in the moor, as a function spatial moor coordinate y and time t, determined by a groundwater (nonlinear diffusion) model. The time-dependent left boundary is coupled to the river and canal.  Right boundary: solid wall. Rainfall is spatially uniform. 
 * Canal and reservoir levels as a function of time. Note the spin-up from dry conditions of about 200s (20 wd).
 * Water depth h(s,t) along the channel s. The three vertical dotted lines correspond to the reservoir, moor, and canal inflows at s = 0.932m, 2.038m, and 3.858m, respectively. The red shaded are denotes the city region.
@@ -115,5 +118,37 @@ Panel description: from top left to bottom right.
 * Cross-channel snapshots of river levels just downstream of the moor inflow (floodplain).
 * Cross-channel snapshots of river levels just downstream of the canal inflow (city).
 
-
 Simulation details: ```run_wetro_2020v2.m```. Video saved as ```MATLAB/mov/wetro2_Nk=100_Tend=1000.avi```.
+
+
+*Note:* moor and reservoir coupling in the code is actually inconsistent with physical set-up. The reservoir is coupled to the river channel only at s=0.932m; the moor is coupled to the river channel at s=2.038m and canal at s=0.932m (mathematically/numerically this is allowed, but makes little sense in reality -- unless a pipe carries partial outflow from the moor to the reservoir location!). Note also that the actual Wetropolis river channel has length L=5.2m.
+
+#### Other comments
+* Ensuring inflow/outflow at boundaries. 
+ 
+ 
+### Wetropolis: fully-coupled v2
+
+#### Summary
+As above but with the following developments:
+* The inconsistencies with the physical set-up are addressed. The reservoir flows partially into the canal and partially into the river channel at s_res; the moor flows into the river channel only at s_m. Length of domain is 5.2m and city region is slightly extended.
+* Groundwater coupling: two implementations. (i) directly to river channel (so that left boundary depth of moor is the same as river depth at that location); (ii) to river channel via a connecting canal (more realistic). 
+* Groundwater model: (i) FD or (ii) FEM model. See material in ```groundwater```  folder for more info on FEM and the connecting canal.
+
+#### Plots
+
+<div align="center"> <bf>The Wetropolis 'live' dashboard </bf> </div>
+
+![live_panel2](MATLAB/mov/wetro3_Nk_100_Tend_1000.gif)
+
+Panel description: as above. 
+* Groundwater coupled directly to river. 
+
+![live_panel3](MATLAB/mov/wetro4_Nk_100_Tend_1000.gif)
+
+Panel description: as above. 
+*Groundwater coupled to river via a connecting canal. 
+
+
+#### Other comments
+

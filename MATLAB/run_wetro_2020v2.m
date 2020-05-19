@@ -3,17 +3,25 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % - RIVER MODEL: ST. VENANT EQ.
-% - GROUNDWATER MODEL: as before
-% - RESERVOIR MODEL: as before
-% - CANALS: as before
+% - GROUNDWATER MODEL: now coupled to river only (directly to river level
+% and via short connecting canal
+% - RESERVOIR MODEL: now coupled to canal and river 
+% - CANALS: no moor coupling, res coupling.
 
 % v2 builds on run_wetro_2020.m. Updates here:
 
-% > clean up code: lots of redundant parts and repetition now.
-% > Advanced groundwater model (FEM) with connecting channel.
-% > Live plotting improvements - save vids? Legend workaround?
-% > More user friendly print text -- GUI with rainfall outcome?
+% > clean up code: lots of redundant parts and repetition. DONE/ongoing.
+% > consistency issues: moor/res location and canal:river split. Domain
+% length etc. DONE.
+% > Advanced groundwater model (FEM) with connecting channel. PARTIALLY
+% DONE but not streamlined
+% > Live plotting improvements. DONE/ongoing -- see live_plotting_panel.m
+% > BCs: steep bedslope at boundaries to enforce inflow/outflow via
+% numerical flux?
 % > EnKF for river model?
+% > simple control problem: constrain river depth less than hT = 0.02 in
+% city by, e.g., turning off reservoir outflow (i.e., raise the weir height so reservoir acts as storage
+% buffer)
 
 clear;
 nparaflag = 2; % 1 is Onno's original design case; 2 is Luke/Onno/real case of parameter choice'
@@ -42,7 +50,8 @@ canalmaxdepth = 0.02;
 Hcc3 = 0.06; % 0.04; % 0.06;    % dike height along canal segment 2, canal max depth 0.0175m before overflow in river
 Hcc2 = 0.04; % 0.04; % 0.06;    % dike height along canal segment 2, canal max depth 0.0175m before overflow in river
 Hcc1 = 0.021; % 0.022; % 0.032; % dike height along canal segment 1, canal max depth 0.0175m before overflow in river
-
+gam_m = 0.0;
+gam_r = 0.2;
 
 %% River channel
 %
@@ -73,7 +82,7 @@ Hcx = Hcc3*0.5*(1+sign(Lc3-xxm))+Hcc2*0.5*(1+sign(xxm-Lc3)).*(1+sign(Lc2-xxm))*0
 Hcxb = Hcx-canalmaxdepth; % Canal bottom topography (3 steps)
 %
 %
-%% (b) St Venant river moidelling
+%% (b) St Venant river model
 %%%----- channel cross-section geometry  parameters ----%%%
 geom.hr = 0.015; 
 geom.wr = 0.05; % m width main river channel
@@ -89,18 +98,22 @@ geom.g = 9.81;     % acceleration of gravity
 geom.Cm = 0.02;    % Manning coefficient
 geom.dbds = -0.01; % mean slope river bed
 
+% test steep bed at s=0,L for effieicent boundaries.
+
 %%%----- channel length parameters ----%%%
-chan.LR3 = 4.2; % total length of channel
-chan.LR3 = Lx; % total length of channel
+chan.LR3 = 5.2; % total length of channel
+% chan.LR3 = Lx; % total length of channel
 
-chan.LR1 = 3.7; % length upto city region
-chan.LR2 = 4.0; % length from end of city region
+chan.LR1 = 3.8; % length upto city region
+chan.LR2 = 4.2; % length from end of city region
 
-chan.LR11 = 3.4;% transition zone from fp to c [LR11, LR1]
-chan.LR22 = 4.1;% transition zone from c to fp [LR2, LR22]
+chan.LR11 = 3.6;% transition zone from fp to c [LR11, LR1]
+chan.LR22 = 4.4;% transition zone from c to fp [LR2, LR22]
 
 chan.s_r = 0.932; % reservoir influx
 chan.s_m = 2.038; % moor influx
+% sr = chan.s_r;
+% sm = chan.s_m;
 
 chan.tr = 50; % severity of transition 
 
@@ -122,6 +135,13 @@ index_fp = [find(s < chan.LR1) find(s > chan.LR2)];
 index_city = intersect(find(s > chan.LR1), find(s < chan.LR2));
 index_m = find(s > chan.s_m); 
 index_r = find(s > chan.s_r); 
+
+% test steep bed at s=0,L for inflow/outflow boundaries?
+dbds_vec = geom.dbds*ones(1,Nk+2);
+jj = 1; % how many cells to steepen at either end?
+dbBC = -1.0; % steepness?
+dbds_vec(1:jj) = dbBC; 
+dbds_vec(end-jj+1:end) = dbBC;
 
 % BOUNDARY CONDITIONS
 % Periodic BC = 1
@@ -150,9 +170,6 @@ Wp = zeros(1,Nk+2);
 Rh = zeros(1,Nk+2);
 dhdA = zeros(1,Nk+2);
 
-% take ICs
-U = U0;
-h = h0;
 
 %% Groundwater model (moor)
 % Moor water inflow in canal at s=Lv<Lc2 gam-fraction and river x=Lv (1-gam) -fraction with gam=gam(t) <=1
@@ -165,65 +182,119 @@ switch nparaflag
         hr0 = 0.01; % m
         Ly = 0.4;   % m
         wv = 0.01;  % width Hele-Shaw moor cell in m
-        Lv = 0.932; % m; % inflow of water off the Hele-Shaw moor in m
+        sm = 0.932; % m; % inflow of water off the Hele-Shaw moor in m
     case 2 % Luke/real settings
         hr0 = 0.0135; % m
         Ly = 0.925; % m
         wv = 0.095; % width Hele-Shaw moor cell in m
-        Lv = 2.038; % m; % inflow of water off the Hele-Shaw moor in m
+        sm = 2.038; % m; % inflow of water off the Hele-Shaw moor in m
 end
 
-Ny = 20;
-dy = Ly/Ny;
-yy = 0:dy:Ly;  % Regular FD or FV grid
-hm = 0*yy;     % Define moor depth variable on grid
-sigm = 0.8;    % fraction of moor pores filled
-sigm0 = 0.1;   % fraction of water remaining in moor pores after water has seeped out
-sigme = sigm;  %
-mpor = 0.3;    % porosity moor
-nu = 10^(-6);  % viscosity water m^2/s
-kperm = 10^-8; % permeability
-alph = kperm/(mpor*nu*sigm);
-gam = 0.2;
+%% (1) finite diff or (2) finite element model
+moormodel = 1;
+switch moormodel
+    
+    case 1 %FD
+        
+        Ny = 20;
+        dy = Ly/Ny;
+        yy = 0:dy:Ly;  % Regular FD or FV grid
+        hm0 = 0*yy;     % Define moor depth variable on grid
+        sigm = 0.8;    % fraction of moor pores filled
+        sigm0 = 0.1;   % fraction of water remaining in moor pores after water has seeped out
+        sigme = sigm;  %
+        mpor = 0.3;    % porosity moor
+        nu = 10^(-6);  % viscosity water m^2/s
+        kperm = 10^-8; % permeability
+        alph = kperm/(mpor*nu*sigm);
+        
+        hcm = 0.0;
+        Pwm = 0.02;
+        Lc = 0.1;
+        
+    case 2 %FEM
+        
+        Lc = -0.05; % connecting canal [m]
+        Lca = abs(Lc);
+        sigm = 0.8;    % fraction of moor pores filled
+        sigm0 = 0.1;   % fraction of water remaining in moor pores after water has seeped out
+        sigme = sigm;  %
+        mpor = 0.3;    % porosity moor
+        nu = 10^(-6);  % viscosity water m^2/s
+        kperm = 10^-8; % permeability
+        alph = kperm/(mpor*nu*sigm);
+        %
+        Ny = 20;   % number of elements
+        Nn = Ny+1; % number of nodes
+        Mm = zeros(Nn,Nn);
+        Sm = zeros(Nn,Nn);
+        
+        dy = Ly/Ny;
+        yy = transpose(0:dy:Ly);  % Regular FEM grid
+        Kky = (yy(2:Nn)-yy(1:Nn-1)); % finite element lengths
+        nini = 1;
+        g3 = sqrt(1.0/3.0);
+        hcm = 0.0;
+        
+        bini = zeros(Nn,1);
+        for nk=1:Ny
+            for na = 1:2
+                ii = (nk-1)+na;
+                bini(ii) = bini(ii)+bgina(Kky(nk),yy(nk),yy(nk+1),na,g3,nini,Ly);
+                for nb = 1:2
+                    jj = (nk-1)+nb;
+                    Mm(ii,jj) = Mm(ii,jj)+Mmalbe(Kky(nk),yy(nk),yy(nk+1),na,nb,g3);
+                    Sm(ii,jj) = Sm(ii,jj)+Smalbe(Kky(nk),yy(nk),yy(nk+1),na,nb,g3);
+                end
+            end
+        end
+        
+        hm0 = zeros(Nn,1);
+        hm0(1:Nn) = Mm\bini;
+        
+        Ml = Mm;
+        Ml(1,1) = Ml(1,1)+Lca/(mpor*sigme);
+        
+end
 
-
+% moor canal = 0
 %% Reservoir
 % Reservoir Hele-Shaw cell with adjustable weir
 %
 switch nparaflag
     case 1
-        Lrer = 2.038;  % m
+        sr = 2.038;  % m
         wres = 0.01;   % m	%
         Lyy  = 0.4;    % length reservoir in
     case 3
-        Lrer = 2.038;  % m
+        sr = 2.038;  % m
         wres = 0.01;   % m	%
         Lyy  = 0.4;    % length reservoir in
     case 2
-        Lrer = 0.932;  % m
+        sr = 0.932;  % m
         wres = 0.123;  % m	%
         Lyy  = 0.293;    % length reservoir in m
 end
 Pwr  = 0.10; % weir height
-hres = 0; % initially empty res
+
 
 %% Moor, res, canal 1 coupling location
-% (v)  canal weirs at s=Lc1 and s=Lc2 critical flow
 %
 %
-nrer = ceil(Lrer/dx); %  grid box in which res water is added in the river
-nxLv = ceil(Lv/dx);    % grid box in which moor water is added in the river
-nxLc1 = ceil(Lc1/dx);  % grid box for regular grid in which canal water segment one is added
+nxsr = ceil(sr/Kk)+1; %  grid box in which res water is added in the river
+nxsm = ceil(sm/Kk)+1;    % grid box in which moor water is added in the river
+nxLc1 = ceil(Lc1/Kk)+1;  % grid box for regular grid in which canal water segment one is added
 %
+% nxr = index_r(1)-1; %  grid box in which res water is added in the river
+% nxsm = index_m(1)-1;    % grid box in which moor water is added in the river
+% nxLc1 = ceil(Lc1/dx);  % grid box for regular grid in which canal water segment one is added
 
 %% Rainfall and time
 switch nparaflag
     case 1 % Onnos original
-        Rain0 = 0.00175; % m/s
         Rain0 = 0.003; % 0.002 works m/s
         Rain = Rain0;
     case 2
-        Rain0 = 0.00013656; % 0.002 works m/s % too low
         Rain0 = 1.5*0.00013656; % This is r0 Eq. 17 in HESS article
         Rain = Rain0;
 end
@@ -233,7 +304,7 @@ Train = Lc2*wc*0.01/(Ly*wv*Rain); % TK: what is Train? unused (in case 2 below)
 %
 %
 Vrate = Ly*wv*Rain0*[1,2,4,8,18]*TimeUnit*1000; % flow rates in liters/TimeUnit (Eq. 18 in HESS?)
-
+%
 rainfac = [0,1,2,4,8,9,18];
 rainpdf = [16,24,77,89,35,8,7]/256;
 
@@ -250,20 +321,36 @@ tijd = 0;
 % - moor
 % - kinematic river
 
-figure(11); clf;
-ini = 1;
+ini = 2;
 switch ini
     case 1 % Mass check starting from absolute drought conditions and then it starts raining
         % canal sections
         h1c = 0;
         h2c = 0;
         h3c = 0;
-        % Hele-Shaw moor
-        hm = 0*yy;
         % River
         Ar = hr0*wr*ones(1,Nx);
+        U = U0;
+        h = h0;
+        % Hele-Shaw moor
+        hm = hm0;
+        % reservoir
+        hres = 0; 
+    case 2 % canals full to weirs, reservoir empty, groundwater level with river level at sm
+        % canal sections
+        h1c = Pw1;
+        h2c = Pw2;
+        h3c = Pw3;
+        % River
+        Ar = hr0*wr*ones(1,Nx);
+        U = U0;
+        h = h0;
+        % Hele-Shaw moor
+        hm = hr0*ones(1,Ny+1); % initial river level
+        % reservoir
+        hres = 0; 
 end
-figure(14); clf;
+
 hro = h(1);
 hrLo = h(nxLc1);
 tijdo = tijd;
@@ -295,7 +382,7 @@ if (VIDEO == 1)
     res = num2str(Nk);
     Tmax = strrep(num2str(Tend), '.', '_');
     
-    outnamev = sprintf('wetro2_Nk=%s_Tend=%s',res,Tmax);
+    outnamev = sprintf('wetro4_Nk=%s_Tend=%s',res,Tmax);
     outnamev = strcat(outdirv,outnamev);
     v = VideoWriter(outnamev);
     v.FrameRate = 5;
@@ -305,7 +392,7 @@ if (VIDEO == 1)
 end
 
 %% Step forward in time...
-CFL = 0.35; % CFL number for stable time-stepping
+CFL = 0.3; % CFL number for stable time-stepping
 while (tijd  <= Tend) % All simple explicit time stepping
     % Randomised rainfall 
     % (3, 7, 5, 1)/16; [0,3]/16, [3,10]/16, [10,15]/16, [15,16]/16
@@ -396,8 +483,8 @@ while (tijd  <= Tend) % All simple explicit time stepping
     [h(1), dhdA(1)] = xsec_hAs(U(1,1),0.5*(-Kk+0),geom,chan);
     [h(Nk+2), dhdA(Nk+2)] = xsec_hAs(U(1,Nk+2),0.5*(L+L+Kk),geom,chan);
     [area(1), Wp(1), Rh(1)] = xsec_Ahs(h(1),0.5*(-Kk+0),geom,chan);
-    [area(Nk+2), Wp(Nk+2), Rh(Nk+2)] = xsec_Ahs(h(Nk+2),0.5*(L+L+Kk),geom,chan); 
-        
+    [area(Nk+2), Wp(Nk+2), Rh(Nk+2)] = xsec_Ahs(h(Nk+2),0.5*(L+L+Kk),geom,chan);
+    
     for j = 2:Nk+1
         [h(j), dhdA(j)] = xsec_hAs(U(1,j),0.5*(s(j-1)+s(j)),geom,chan);
         [area(j), Wp(j), Rh(j)] = xsec_Ahs(h(j),0.5*(s(j-1)+s(j)),geom,chan);
@@ -411,7 +498,7 @@ while (tijd  <= Tend) % All simple explicit time stepping
     Vr = (wr*hr(1:Nx)./(2*hr(1:Nx)+wr)).^(2/3)*sqrt(-dbdxmean)/Cm; % kinematic velocity
     
     dtr = dx/max(abs(Vr)); %dt kinematic river
-    dtm = dy^2/(alph*g*max(hmg,0.001)); %dt moor?
+    dtm = 0.5*dy^2/(alph*g*max(hmg,0.001)); %dt moor
     dtAu = min(Kk./max(abs(U(2,:)./U(1,:) - sqrt(geom.g*U(1,:).*dhdA)),...
         abs(U(2,:)./U(1,:) + sqrt(geom.g*U(1,:).*dhdA)))); %dt st venant
     dt = CFL*min(dtr,min(dtm,dtAu)); % take min timestep with CFL
@@ -425,7 +512,57 @@ while (tijd  <= Tend) % All simple explicit time stepping
     
     nt=nt+1;
     %
-    %% Update canal sections
+    
+    %% Update reservoir: hres(t)
+    %
+    hreso = hres;
+    Qresw = Cf*wres*sqrt(g)*max(hreso-Pwr,0)^(3/2);
+    hres = hreso+dt*Rr(1)-(dt/(Lyy*wres))*Qresw;
+    
+    %% Update groundwater model (moor)
+    %
+    switch moormodel
+        
+        case 1 % FD
+            num = dt/dy^2;
+            %
+            hmo = hm;
+            
+            % first grid point
+%             hm(1) = h3co; %Canal-3 (?) Jan 2017: this is wrong needs correction h2co -> h3co -- why???
+%             hm(1) = h(nxsm); %River at sm
+            hm(1) = hcm;% Moor canal 
+
+            % interior points
+            hm(2:Ny) = hmo(2:Ny)+num*alph*g*(0.5*(hmo(3:Ny+1)+hmo(2:Ny)).*(hmo(3:Ny+1)-hmo(2:Ny))-0.5*(hmo(2:Ny)+hmo(1:Ny-1)).*(hmo(2:Ny)-hmo(1:Ny-1)))+dt*Rm(2:Ny)/(mpor*sigme);
+            % wall at last grid point so no flux
+            hm(Ny+1) = hmo(Ny+1)+num*alph*g*(hmo(Ny)+hmo(Ny+1))*(hmo(Ny)-hmo(Ny+1))+dt*Rm(Ny+1)/(mpor*sigme);
+            % outflow
+            Qmoor = 0.5*mpor*sigme*wv*alph*g*(hmo(2)^2-hm(1)^2)/dy;
+            
+            % connecting canal?
+            hcmo = hcm;
+            Qcm = wr*sqrt(g)*Cf*max(hcmo-Pwm,0)^(3/2);
+            hcm = hcmo+(dt/(Lc*wv))*( Qmoor - Qcm );
+            
+            
+        case 2 %FEM -- not yet fully coupled -- check rainterm function.
+            bini = zeros(Nn,1); % size(bini)
+            for nk=1:Ny
+                for na = 1:2
+                    ii = (nk-1)+na;
+                    bini(ii) = bini(ii)+rainterm(Kky(nk),yy(nk),yy(nk+1),na,g3,nini,Ly,1.0/(mpor*sigme),Rm(nk),alph*g,hm(nk),hm(nk+1));
+                end
+            end
+            bini(1) = bini(1)-sqrt(g)*max(2*hcm/3,0.0)^(1.5)/(mpor*sigme);
+            hmnew = Ml\(Ml*hm+dt*bini);
+            hm = hmnew(1);
+            hm(1) = hcm;
+            hm(2:Nn) = transpose(hmnew(2:Nn));
+    end
+    %
+    %
+    %% Update canal sections: h3c(t), h2c(t), h1c(t)
     %
     h3co = h3c; 
     h2co = h2c; 
@@ -437,32 +574,12 @@ while (tijd  <= Tend) % All simple explicit time stepping
     Qc2 = wc*sqrt(g)*Cf*max(h2co-Pw2,0)^(3/2);        % units: m m^(1/2)/s m^(3/2) = m^3/s
     Qc1 = wc*sqrt(g)*Cf*max(h1co-Pw1,0)^(3/2)*tesfac; % units: m m^(1/2)/s m^(3/2) = m^3/s
     % first order approximations
-    h3c = h3co+(dt/(Lsec3*wc))*( gam*mpor*sigme*wv*alph*g*0.5*(hm(2)^2-h3co^2)/dy-Qc3 ); % corrected  Jan 2017: needs correction h2co -> h3co
-    h2c = h2co+(dt/(Lsec2*wc))*( Qc3-Qc2 );
+    h3c = h3co+(dt/(Lsec3*wc))*( gam_r*Qresw - Qc3 );
+    h2c = h2co+(dt/(Lsec2*wc))*( Qc3 + gam_m*Qmoor - Qc2 ); % note: gam_m = 0 in real set-up
     h1c = h1co+(dt/(Lsec1*wc))*( Qc2-Qc1 );
     tes = 0.5*(1+sign(bx(1:Nx)+hr(1:Nx)-Hcxb(1:Nx)-h1co));
-    % h1c = h1c+nswitch*(dt/(Lc1*wc))*Cf*sqrt(g)*max(bx(1:Nx)+hr(1:Nx)-Hcc1,0).^(3/2).*(1+sign(xxm-Lc2)).*tes*0.5*transpose(Kk); % addition of river water wrong
     %
-    %% Update groundwater model (moor)
-    %
-    num = dt/dy^2;
-    %
-    % first grid point
-    % Option a) canal bottom coincide with Hele-Shaw moor bottom such that hm(1) = hc1; b) hm(1) = hm(1)+num;
-    hmo = hm;
-    hm(1) = h3co; % Jan 2017: this is wrong needs correction h2co -> h3co
-    % interior points
-    hm(2:Ny) = hmo(2:Ny)+num*alph*g*(0.5*(hmo(3:Ny+1)+hmo(2:Ny)).*(hmo(3:Ny+1)-hmo(2:Ny))-0.5*(hmo(2:Ny)+hmo(1:Ny-1)).*(hmo(2:Ny)-hmo(1:Ny-1)))+dt*Rm(2:Ny)/(mpor*sigme);
-    % wall at last grid point so no flux
-    hm(Ny+1) = hmo(Ny+1)+num*alph*g*(hmo(Ny)+hmo(Ny+1))*(hmo(Ny)-hmo(Ny+1))+dt*Rm(Ny+1)/(mpor*sigme);
-    
-    %
-    %% Update reservoir hres(t)
-    %
-    hreso = hres;
-    Qresw = Cf*wres*sqrt(g)*max(hreso-Pwr,0)^(3/2);
-    hres = hreso+dt*Rr(1)-(dt/(Lyy*wres))*Qresw;
-    %
+
      %% Update river kinematic
 %     %
 %     Ar0 = hr0*wr; % in m hrofunc(tijd,wr);
@@ -498,28 +615,10 @@ while (tijd  <= Tend) % All simple explicit time stepping
         [area(j), Wp(j), Rh(j)] = xsec_Ahs(h(j),0.5*(s(j-1)+s(j)),geom,chan);
     end
     
-%     %%%----- compute topographic terms as per Audusse -----%%%
-%     
-%     Sb(2,:) = 0.5*g*(Uminus(1,2:end).^2 - Uplus(1,1:end-1).^2);
-    
     %%%----- compute extraneous forcing terms S(U) -----%%%
-%     Rh = 0.009;
-    
     S(1,:) = 0;
     S(2,:) = -geom.g*U(1,:)*geom.dbds - geom.g*geom.Cm^2*U(2,:).*abs(U(2,:)./U(1,:))./Rh.^(4/3);
-
-%     %%%---- determine timestep for stability using wave eigen-speeds -----%%% 
-%     
-%     dt = cfl*min(Kk./max(abs(U(2,:)./U(1,:) - sqrt(geom.g*U(1,:).*dhdA)),...
-%         abs(U(2,:)./U(1,:) + sqrt(geom.g*U(1,:).*dhdA))));
-%     
-%     %%%----- update time given new time step -----%%%
-%     tn = tn + dt;
-%     
-%     if (tn > tmeasure)
-%         dt = dt - (tn - tmeasure) + 1.e-10;
-%         tn = tmeasure+1.e-10;
-%     end
+    S(2,:) = -geom.g*U(1,:).*dbds_vec - geom.g*geom.Cm^2*U(2,:).*abs(U(2,:)./U(1,:))./Rh.^(4/3);
     
     %%% P fluxes as per the NCP theory
     Pp = 0.5*VNC + Flux;
@@ -556,13 +655,13 @@ while (tijd  <= Tend) % All simple explicit time stepping
     end
     
     % Area: update point source terms S_A
-    UU(1,nxLv) = UU(1,nxLv) + dt*((1-gam)*mpor*sigme*wv*alph*g*0.5*(hmo(2)^2-h3co^2)/dy)/Kk; % moor inflow
-    UU(1,nrer) = UU(1,nrer) + dt*Qresw/Kk; % res inflow 
+    UU(1,nxsm) = UU(1,nxsm) + dt*(1-gam_m)*Qcm/Kk; % moor inflow
+    UU(1,nxsr) = UU(1,nxsr) + dt*(1-gam_r)*Qresw/Kk; % res inflow 
     UU(1,nxLc1)= UU(1,nxLc1)+ nswitch2*dt*Qc1/Kk; % canal 1 inflow
     
     % Discharge: update point source term --- u*S_A
-    UU(2,nxLv) = UU(2,nxLv) + (UU(2,nxLv)/UU(1,nxLv))*dt*((1-gam)*mpor*sigme*wv*alph*g*0.5*(hmo(2)^2-h3co^2)/dy)/Kk; % moor inflow 
-    UU(2,nrer) = UU(2,nrer) + (UU(2,nrer)/UU(1,nrer))*dt*Qresw/Kk; % res inflow
+    UU(2,nxsm) = UU(2,nxsm) + (UU(2,nxsm)/UU(1,nxsm))*dt*(1-gam_m)*Qcm/Kk; % moor inflow 
+    UU(2,nxsr) = UU(2,nxsr) + (UU(2,nxsr)/UU(1,nxsr))*dt*(1-gam_r)*Qresw/Kk; % res inflow
     UU(2,nxLc1)= UU(2,nxLc1)+ (UU(2,nxLc1)/UU(1,nxLc1))*dt*nswitch2*Qc1/Kk; % canal 1 inflow
 %     
     %%%----- update arrays for A, Au and h -----%%%

@@ -49,6 +49,9 @@ end
 % mainfig = figure(111);
 % mainfig.WindowState = 'maximized';
 
+
+%% Canals and reservoir
+
 % subplot(2,2,1);
 % subplot(2,6,2);
 % subplot(2,5,3);
@@ -61,6 +64,8 @@ plot(tijd,hres/10,'*r','linewidth',1); hold on;
 ylim([0,0.025]);
 xlabel('t [s]','fontsize',fs);
 ylabel('Water depth h [m]', 'fontsize',fs); hold on;
+
+%% h BCinflow and time series in city
 
 % subplot(2,2,2);
 % subplot(2,6,4);
@@ -75,16 +80,27 @@ ylim([0,0.025]);
 xlabel('t [s]', 'fontsize',fs);
 ylabel('River level h [m]', 'fontsize',fs); hold on;
 
+%% Groundwater model
 % subplot(2,2,3);
 % subplot(2,6,3);
 % subplot(2,5,2);
 subaxis(nrow,ncol,pm, 'Spacing', sp, 'Padding', pa, 'Margin', ma);
-plot(yy,hm,'-','linewidth',2);
+plot(yy,hm,'-','linewidth',2); 
+hold on; % for plotting moor canal and river coupling
+plot([-Lc,0],[hcm,hcm],'-','linewidth',2); hold on;
+plot([-wr-Lc,-Lc],[h(nxsm), h(nxsm)],'-','linewidth',2); hold on;
+plot([-Lc,-Lc], [0,Pwm],'-k','linewidth',2); hold on;
+plot([0,0], [0,0.12],'--k','linewidth',1);
+hold off;
+xlim([-(wr+Lc),Ly]);
 % legend({'Groundwater level'},'Location','southeast','fontsize',fs);
 ylim([0,0.12]);
 xlabel('y [m]', 'fontsize',fs);
 ylabel('h_m(y,t) [m]', 'fontsize',fs);
 
+
+
+%% Rainfall: amounts and locations
 % subplot(2,2,4);
 % subplot(2,6,1);
 % subplot(2,5,1);
@@ -98,7 +114,7 @@ xlabel('t [s]', 'fontsize',fs);
 ylabel('Rainfall factor', 'fontsize',fs);
 %
 
-% fg = figure(114);
+%% River level: h(s,t) whole domain
 % subplot(2,2,1);
 % subplot(2,6,[11 12]);
 % subplot(2,5,9);
@@ -119,6 +135,7 @@ axis([0 L 0.01 0.03]);
 xlabel('s','fontsize',fs); ylabel('h(s,t)','fontsize',fs);
 title([]);
 
+%% River flow: Au(s,t) whole domain
 % subplot(2,2,2);
 % subplot(2,6,[5 6]);
 % subplot(2,5,10);
@@ -134,6 +151,7 @@ axis([0 L 0.0001 0.0004]);
 xlabel('s','fontsize',fs); ylabel('Au(s,t)','fontsize',fs);
 title([]);
 
+%% River level: cross-channel h in city
 % subplot(2,2,4);
 % subplot(2,6,10);
 % subplot(2,5,7);
@@ -145,6 +163,7 @@ text(Xc(1)+0.01,0.9*Yc(1),['t=',num2str(tijd)],'fontsize',fs,'HorizontalAlignmen
 text(Xc(1)+0.01,0.8*Yc(1),['s=',num2str(s(ct))],'fontsize',fs,'HorizontalAlignment', 'left');
 axis([min(Xc) max(Xc) min(Yc) max(Yc)]);
 
+%% River level: cross-channel h in floodplain
 % subplot(2,2,3);
 % subplot(2,6,9);
 % subplot(2,5,6);
@@ -156,7 +175,7 @@ text(Xc(1)+0.01,0.9*Yc(1),['t=',num2str(tijd)],'fontsize',fs,'HorizontalAlignmen
 text(Xc(1)+0.01,0.8*Yc(1),['s=',num2str(s(fp))],'fontsize',fs,'HorizontalAlignment', 'left');
 axis([min(Xc) max(Xc) min(Yc) max(Yc)]);
 
-%         figure(13);
+%% Rainfall: sample and theoretical pdf
 % subplot(1,2,1);
 % subplot(2,6,7);
 % subplot(2,5,4);
@@ -168,6 +187,7 @@ xlabel('Rain / wd', 'fontsize',fs);
 ylabel('Density', 'fontsize',fs);
 axis([-0.5 20 0 0.4]);
 
+%% Stage-discharge relationship (rating curve?) in city 
 % subplot(2,6,8);
 % subplot(2,5,5);
 subaxis(nrow,ncol,pQh, 'Spacing', sp, 'Padding', pa, 'Margin', ma);
@@ -177,7 +197,7 @@ xlabel('h', 'fontsize',fs);
 ylabel('Q', 'fontsize',fs);
 axis([0.01 0.03 0.0001 0.0003]);
 
-drawnow; pause(0.2);
+drawnow; pause(0.01);
 
 %
 %         figure(14);
