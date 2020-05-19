@@ -137,17 +137,15 @@ As above but with the following developments:
 
 #### Plots
 
-<div align="center"> <bf>The Wetropolis 'live' dashboard </bf> </div>
-
+##### Groundwater (FD) coupled directly to river
 ![live_panel2](MATLAB/mov/wetro3_Nk_100_Tend_1000.gif)
 
 Panel description: as above. 
-* Groundwater coupled directly to river. 
 
+##### Groundwater (FD) coupled to river via a connecting canal
 ![live_panel3](MATLAB/mov/wetro4_Nk_100_Tend_1000.gif)
 
 Panel description: as above. 
-*Groundwater coupled to river via a connecting canal. 
 
 
 #### Other comments
