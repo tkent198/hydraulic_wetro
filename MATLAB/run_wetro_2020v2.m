@@ -4,9 +4,9 @@
 
 % - RIVER MODEL: ST. VENANT EQ.
 % - GROUNDWATER MODEL: now coupled to river only (directly to river level
-% and via short connecting canal
+% and via short connecting canal)
 % - RESERVOIR MODEL: now coupled to canal and river 
-% - CANALS: no moor coupling, res coupling.
+% - CANALS: no moor coupling (optional), res coupling.
 
 % v2 builds on run_wetro_2020.m. Updates here:
 
@@ -50,8 +50,9 @@ canalmaxdepth = 0.02;
 Hcc3 = 0.06; % 0.04; % 0.06;    % dike height along canal segment 2, canal max depth 0.0175m before overflow in river
 Hcc2 = 0.04; % 0.04; % 0.06;    % dike height along canal segment 2, canal max depth 0.0175m before overflow in river
 Hcc1 = 0.021; % 0.022; % 0.032; % dike height along canal segment 1, canal max depth 0.0175m before overflow in river
-gam_m = 0.0;
-gam_r = 0.2;
+
+gam_m = 0.0; % proportion of water entering canal from moor (zero in physical model)
+gam_r = 0.2; % proportion of water entering canal from reservoir (unknown) 
 
 %% River channel
 %
