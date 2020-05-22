@@ -5,17 +5,13 @@
 % - RIVER MODEL: ST. VENANT EQ.
 % - GROUNDWATER MODEL: further developed (See below)
 % - RESERVOIR MODEL: now coupled to canal and river 
-% - CANALS: no moor coupling (optional), res coupling.
+% - CANALS: correct moor coupling (optional), res coupling (optional).
 
-% v2 builds on run_wetro_2020.m. Updates here:
+% v3 builds on run_wetro_2020vr.m. Updates here:
 
 % > clean up code: lots of redundant parts and repetition. DONE/ongoing.
-% > consistency issues: moor/res location and canal:river split. Domain
-% length etc. DONE.
 % > Advanced groundwater model (FEM) with connecting channel. PARTIALLY
-% DONE but not behaving as expected
-% > Live plotting improvements. DONE/ongoing -- see live_plotting_panel.m
-%%%% More ideas
+% DONE, needs checking.
 % > save rainfall data for repeat experiments 
 % > BCs: steep bedslope at boundaries to enforce inflow/outflow via
 % numerical flux?
@@ -26,8 +22,9 @@
 
 clear;
 nparaflag = 2; % 1 is Onno's original design case; 2 is Luke/Onno/real case of parameter choice'
-VIDEO = 0; % 0 to run without saving a vid, 1 for save.
-
+VIDEO = 0; % 0 to run without saving a vid, 1 to save.
+RAINSAVE = 0; % 1 to save randomly-generated rainfall, 0 to not save
+RAINLOAD = 0; % 1 to load saved rainfall (must specify file name), 0 
 %% Canal
 % Canal: s=0,..., Lc3 (lock 3), s=Lc3, ..., Lc2 (lock 2), s=Lc2,..., Lc1 (lock 1 into river)
 % (a) Simple kinetic model with variables: h1=h1(t) in 1st, h2=h2(t) in 2nd section canal section
@@ -125,7 +122,7 @@ Neq = 2; % U = (A, Au)
 
 %%%----- Set up grid with curvilinear coord s -----%%%
 L=chan.LR3; %length of domain
-Nk=100; %number of gridcells (excluding ghost)
+Nk=500; %number of gridcells (excluding ghost)
 Nf=Nk+1; %number of nodes
 Kk=L/Nk; %length of cell
 s=0:Kk:L;%node location
@@ -137,6 +134,13 @@ index_fp = [find(s < chan.LR1) find(s > chan.LR2)];
 index_city = intersect(find(s > chan.LR1), find(s < chan.LR2));
 index_m = find(s > chan.s_m); 
 index_r = find(s > chan.s_r); 
+
+% test steep bed at s=0,L for inflow/outflow boundaries?
+dbds_vec = geom.dbds*ones(1,Nk+2);
+jj = 3; % how many cells to steepen at either end?
+dbBC = -10.0; % steepness?
+dbds_vec(1:jj) = dbBC; 
+dbds_vec(end-jj+1:end) = dbBC;
 
 % BOUNDARY CONDITIONS
 % Periodic BC = 1
@@ -362,12 +366,38 @@ nswitch2 = 1;
 tunit = 0; % why tunit = 1 originally?
 nrain = 4; 
 
-Rm(1:Ny+1) = 0*nrain*Rain0*ones(1,Ny+1); % why Rm and Rr non-zero
+% Rm(1:Ny+1) = 0*nrain*Rain0*ones(1,Ny+1); % why Rm and Rr non-zero
 % initially?
-Rr(1:Ny+1) = 0*nrain*Rain0*ones(1,Ny+1); %
+% Rr(1:Ny+1) = 0*nrain*Rain0*ones(1,Ny+1); %
+
+% nchisto = zeros(1,tplot);
+rainm_save = zeros(Ny+1,tplot);
+rainr_save = zeros(Ny+1,tplot);
+
 nrainc = 1;
 ncc = 0;
-%% Video?
+%% Video? Save?
+
+if (RAINSAVE == 1)
+    
+    % make directory path
+    outdirs = strcat(pwd, {'/'}, 'raindata/');
+    outdirs = strjoin(outdirs);
+    
+    Tstr = strrep(num2str(Tend), '.', '_');
+    
+    outnames = sprintf('rain#1_tmax=%s',Tstr);
+    
+end
+
+if (RAINLOAD == 1)
+    
+    rain = load('raindata/rain#1_tmax=1000.mat');
+    Rmload = rain.raindata.rainm;
+    Rrload = rain.raindata.rainr;    
+    
+    nrainc = 2;
+end
 
 if (VIDEO == 1)
     % make directory path
@@ -375,9 +405,9 @@ if (VIDEO == 1)
     outdirv = strjoin(outdirv);
     
     res = num2str(Nk);
-    Tmax = strrep(num2str(Tend), '.', '_');
+    Tstr = strrep(num2str(Tend), '.', '_');
     
-    outnamev = sprintf('wetro4_Nk=%s_Tend=%s',res,Tmax);
+    outnamev = sprintf('wetro5_Nk=%s_Tend=%s',res,Trt);
     outnamev = strcat(outdirv,outnamev);
     v = VideoWriter(outnamev);
     v.FrameRate = 5;
@@ -441,14 +471,27 @@ while (tijd  <= Tend) % All simple explicit time stepping
                     end
                 end
                 
-                
+                rainm_save(:,ncc) = Rm/Rain0;
+                rainr_save(:,ncc) = Rr/Rain0;
                 
                 nchisto(ncc) = not;
                 fprintf('tunit: %g nrain: %d noloc: %d not:%d\n',tunit,nrain,nloc,not);
                 
             end
+        
+        case 2 % using saved rain 
             
-        case 2 % uniform light rainfall continuous in time
+            while (tijd >= tunit)
+                
+                ncc = ncc+1;
+                tunit  = tunit+TimeUnit;
+                
+                Rm = Rmload(:,ncc)/Rain0;
+                Rr = Rrload(:,ncc)/Rain0;
+                
+            end
+            
+        case 3 % uniform light rainfall continuous in time
             
             if (tijd > Train)
                 Rm(1:Ny+1) = Rain0*ones(1,Ny+1);  % 1mm/s
@@ -495,7 +538,7 @@ while (tijd  <= Tend) % All simple explicit time stepping
         tijd = tmeas+1.e-10;
     end
     
-    nt=nt+1; % used where?
+%     nt=nt+1;
     %
     
     %% Update reservoir: hres(t)
@@ -523,7 +566,7 @@ while (tijd  <= Tend) % All simple explicit time stepping
             % wall at last grid point so no flux
             hm(Ny+1) = hmo(Ny+1)+num*alph*g*(hmo(Ny)+hmo(Ny+1))*(hmo(Ny)-hmo(Ny+1))+dt*Rm(Ny+1)/(mpor*sigme);
             % outflow
-            Qmoor = 0.5*mpor*sigme*wv*alph*g*(hmo(2)^2-hmo(1)^2)/dy;
+            Qmoor = 0.5*mpor*sigme*wv*alph*g*(hmo(2)^2-hm(1)^2)/dy;
             
             % connecting canal?
             hcmo = hcm;
@@ -564,15 +607,17 @@ while (tijd  <= Tend) % All simple explicit time stepping
     h3co = h3c; 
     h2co = h2c; 
     h1co = h1c;
+    
     % Q3c, Q2c, Q1c
-    Qc3 = wc*sqrt(g)*Cf*max(h3co-Pw3,0)^(3/2);        % units: m m^(1/2)/s m^(3/2) = m^3/s
-    Qc2 = wc*sqrt(g)*Cf*max(h2co-Pw2,0)^(3/2);        % units: m m^(1/2)/s m^(3/2) = m^3/s
-    Qc1 = wc*sqrt(g)*Cf*max(h1co-Pw1,0)^(3/2);        % units: m m^(1/2)/s m^(3/2) = m^3/s
+    Qc3 = wc*sqrt(g)*Cf*max(h3co-Pw3,0)^(3/2);        
+    Qc2 = wc*sqrt(g)*Cf*max(h2co-Pw2,0)^(3/2);        
+    Qc1 = wc*sqrt(g)*Cf*max(h1co-Pw1,0)^(3/2); 
+    
     % first order approximations
     h3c = h3co+(dt/(Lsec3*wc))*( gam_r*Qresw - Qc3 );
     h2c = h2co+(dt/(Lsec2*wc))*( Qc3 + gam_m*Qmoor - Qc2 ); % note: gam_m = 0 in real set-up
     h1c = h1co+(dt/(Lsec1*wc))*( Qc2-Qc1 );
-    tes = 0.5*(1+sign(bx(1:Nx)+hr(1:Nx)-Hcxb(1:Nx)-h1co));
+
     %
 
      %% Update river kinematic
@@ -594,7 +639,7 @@ while (tijd  <= Tend) % All simple explicit time stepping
 %     Qr = Vr.*Ar; % dscharge
     %
     %
-    %% update river Au 
+    %% update river St Venant 
     for j = 1:Nk+1
         [Flux(:,j), SL(j), SR(j), VNC(:,j)] = NCPflux_Au(U(:,j),U(:,j+1),s(j),geom,chan);
     end
@@ -613,6 +658,7 @@ while (tijd  <= Tend) % All simple explicit time stepping
     %%%----- compute extraneous forcing terms S(U) -----%%%
     S(1,:) = 0;
     S(2,:) = -geom.g*U(1,:)*geom.dbds - geom.g*geom.Cm^2*U(2,:).*abs(U(2,:)./U(1,:))./Rh.^(4/3);
+    S(2,:) = -geom.g*U(1,:).*dbds_vec - geom.g*geom.Cm^2*U(2,:).*abs(U(2,:)./U(1,:))./Rh.^(4/3);
     
     %%% P fluxes as per the NCP theory
     Pp = 0.5*VNC + Flux;
@@ -699,10 +745,16 @@ while (tijd  <= Tend) % All simple explicit time stepping
     
 end
 
+%% close vid and save rain?
 if (VIDEO == 1)
     close(v);
 end
-% figure(13);
-% ntot = Tend/TimeUnit;
-% histogram(nchisto);
 
+if (SAVE == 1)
+    
+    raindata.rainm = rainm_save;
+    raindata.rainr = rainr_save;
+    
+    save(fullfile(outdirs, outnames),'raindata');
+    
+end
