@@ -118,10 +118,10 @@ Panel description: from top left to bottom right.
 * Cross-channel snapshots of river levels just downstream of the moor inflow (floodplain).
 * Cross-channel snapshots of river levels just downstream of the canal inflow (city).
 
-Simulation details: ```run_wetro_2020v2.m```. Video saved as ```MATLAB/mov/wetro2_Nk=100_Tend=1000.avi```.
+Simulation details: ```run_wetro_2020v2.m```. Video saved as ```MATLAB/mov/wetro2_Nk=100_Tend=1000.avi```. Number of elements Nk = 100 implies a grid-size of 4.21cm.
 
 
-***Note:*** moor and reservoir coupling in the code is actually inconsistent with physical set-up. In the above simulations: the reservoir is coupled to the river channel only at s=0.932m; the moor is coupled to the river channel at s=2.038m and canal at s=0.932m (mathematically/numerically this is allowed, but makes little sense in reality -- unless a pipe carries partial outflow instantaneously from the moor to the reservoir location!). Note also that the actual Wetropolis river channel has length L=5.2m.
+***Note:*** moor and reservoir coupling in the code is actually inconsistent with physical set-up. In the above simulations: the reservoir is coupled to the river channel only at s=0.932m; the moor is coupled to the river channel at s = 2.038m and canal at s = 0.932m (mathematically/numerically this is allowed, but makes little sense in reality -- unless a pipe carries partial outflow instantaneously from the moor to the reservoir location!). Note also that the actual Wetropolis river channel has length L=5.2m.
 
 #### Other comments
 * On a basic flood control experiment: constrain river depth to be less than hT = 0.02m in city by, e.g., turning off reservoir outflow (i.e., raise the weir height from 0.01m so reservoir acts as storage buffer during high rainfall, then lower weir height as rainfall lessens). This could be implemented in a straightforward was as follows. 
@@ -152,6 +152,7 @@ Panel description: as above.
 * The moor canal, y in [-0.1, 0],  has spatially uniform depth >>> simple ODE in time (orange line). Provides BC for the groundwater model. This canal has weir at y = -0.1 of height 0.2m; when depth exceeds this, fluid flows into the river channel (yellow line; cross channel) via the weir relations.
 * Issue: bottom of the moor, canal and river channel coincide. In reality, they lie at different levels.
 
+Simulation details: ```run_wetro_2020v2.m```. Videos saved as ```MATLAB/mov/wetro3_Nk=100_Tend=1000.avi``` and ```MATLAB/mov/wetro4_Nk=100_Tend=1000.avi```. Number of elements Nk = 100 implies a grid-size of 5.2 cm.
 
 #### Other comments
 * Ensuring inflow/outflow at boundaries: try steep bed slope at boundaries.
