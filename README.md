@@ -2,7 +2,7 @@
 
 ## Wetropolis rainfall and flood demonstrator: developments in hydraulic modelling and visualisation
 
-This repository contains the source code and documentation on the numerical modelling of Wetropolis. In Bokhove et al. (2020), a numerical model (based on the equations for open channel flow under the kinematic assumption) is used to determine the relevant time and length scales prior to its construction as a physical model -- see the [Wetropolis' design and showcase Github page](https://github.com/obokhove/wetropolis20162020/) for more info. The original numerical model is crude and inexpensive, suitable for design purposes but unsuitable as a predictive model. **This page tracks the further development of the mumerical modelling and visualisation of Wetropolis, with a view to conducting Wetropolis-inspired experiments in data assimilation, flood mitigation, and control.** See [taster](#taster) for an illustrative movie.
+This repository contains the source code and documentation on the numerical modelling of Wetropolis. In Bokhove et al. (2020), a numerical model (based on the equations for open channel flow under the kinematic assumption) is used to determine the relevant time and length scales prior to its construction as a physical model -- see the [Wetropolis' design and showcase Github page](https://github.com/obokhove/wetropolis20162020/) for more info. The original numerical model is crude and inexpensive, suitable for design purposes but unsuitable as a predictive model. **This page tracks the further development of the numerical modelling and visualisation of Wetropolis, with a view to conducting experiments in data assimilation, flood mitigation, and control.** See [taster](#taster) for an illustrative movie.
 
 ---
 ## Contents
