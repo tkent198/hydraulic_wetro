@@ -172,11 +172,7 @@ Starting from 'entire system v2' above, these simulations introduce two new step
 The following two figures are snapshots at t=1000 (i.e., the end of the simulation) from the Wetropolis dashboard: the first is a standard run (''entire system v2') with 100 days' rainfall data saved as ```MATLAB/raindata/rain#3_tmax=1000.mat```; the second uses the same rainfall data but with Qres(t) = 0 for all t.
 
 ##### Standard run
-
-<img src="figs/wetro5rain3_Nk=100_Tend=1000.png" width="200" />
-
 ![standard](figs/wetro5rain3_Nk=100_Tend=1000.png)
 
 ##### Infinite reservoir
-
-<img src="figs/wetro5rain3_infres_Nk=100_Tend=1000.png" width="200" />
+![infres](figs/wetro5rain3_infres_Nk=100_Tend=1000.png)
