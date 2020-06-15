@@ -173,8 +173,8 @@ The following two figures are snapshots at t=1000 (i.e., the end of the simulati
 
 ##### Standard run
 
-![galtons](figs/galtonboardsHESS.png)
+<img src="figs/wetro5rain#3_Nk=100_Tend=1000.png">
 
 ##### Infinite reservoir
 
-<img src="figs/wetro5rain#3_infres_Nk=100_Tend=1000.png" style="width:100%">
+<img src="figs/wetro5rain#3_infres_Nk=100_Tend=1000.png">
