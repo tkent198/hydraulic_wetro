@@ -160,7 +160,7 @@ Panel description: as above.
 
 Simulation details: ```run_wetro_2020v2.m```. Videos saved as ```MATLAB/mov/wetro3_Nk=100_Tend=1000.avi``` and ```MATLAB/mov/wetro4_Nk=100_Tend=1000.avi```. Number of elements Nk = 100 implies a grid-size of 5.2 cm.
 
-#### Other comments [both implemented in ```run_wetro_2020v3.m```
+#### Other comments [both now implemented in ```run_wetro_2020v3.m```]
 * Ensuring inflow/outflow at boundaries: try steep bed slope at boundaries.
 * Save the rainfall data for valid comparison between simulations. 
 
@@ -172,8 +172,8 @@ Starting from 'entire system v2' above, these simulations introduce two new step
 The following two figures are snapshots at t=1000 (i.e., the end of the simulation) from the Wetropolis dashboard: the first is a standard run (''entire system v2') with 100 days' rainfall data saved as ```MATLAB/raindata/rain#3_tmax=1000.mat```; the second uses the same rainfall data but with Qres(t) = 0 for all t.
 
 ##### Standard run
-![control](figs/mov/wetro5rain#3_Nk=100_Tend=1000.png)
+![control](figs/wetro5rain#3_Nk=100_Tend=1000.png)
 
 ##### Infinite reservoir
-![infinte reservoir](figs/wetro5rain#3_infres_Nk=100_Tend=1000.png)
+![infintereservoir](figs/wetro5rain#3_infres_Nk=100_Tend=1000.png)
 
