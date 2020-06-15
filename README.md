@@ -175,7 +175,7 @@ The following two figures are snapshots at t=1000 (i.e., the end of the simulati
 
 <img src="figs/wetro5rain3_Nk=100_Tend=1000.png" width="200" />
 
-!(standard)[figs/wetro5rain3_Nk=100_Tend=1000.png]
+![standard](figs/wetro5rain3_Nk=100_Tend=1000.png)
 
 ##### Infinite reservoir
 
