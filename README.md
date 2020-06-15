@@ -96,7 +96,7 @@ File/dir name                   |  Summary
 
 
 ## Preliminary simulations 
-### Wetropolis: fully-coupled v1
+### Wetropolis: entire system v1
 
 #### Summary
 First simulations of the St. Venant system for the river dynamics coupled to the other components of Wetropolis (see plan view above). Rainfall is supplied each wd at a random location (reservoir, moor, both, or nowhere) and rate (loosely-speaking 1, 2, 4, or 9s per wd). Separate reservoir and moor groundwater models describe the water level in these locations.The reservoir has an outflow directly into the river channel at s = s_res = 0.932m, and the moor has an outflow into the river channel and the canal at s = s_m = 2.038m *[see note below]* . The canal runs parallel to the river channel and has 3 sections connected by weirs (locks) and the water level in each section is constant in space. The final canal section flows into the river channel in the city region (s = s_c1 = 3.858m). Flooding occurs in the city region when the river levels exceed 0.02m. Initially, the moor, reservoir, and canal sections are dry, the river channel has constant depth with prescribed constant inflow at s=0.
@@ -133,10 +133,10 @@ else
 	Pwr = 0.1
 end
  ```
-NOTE: as a first check to see if the reservoir has enough storage capacity to buffer the flood peak, set Qres(t) = 0 for all t. 
+NOTE: as a first check to see if the reservoir has enough storage capacity to buffer the flood peak, set Qres(t) = 0 for all t  -- the "infinite reservoir". 
 * EnKF for river dynamics and parameter estimation (see, e.g., Liz Cooper's recent work). In practice many parameters are poorly understood (Manning coeff, inflow rate, portion of outflow to canal/river etc.). 
  
-### Wetropolis: fully-coupled v2
+### Wetropolis: entire system v2
 
 #### Summary
 As above but with the following developments:
@@ -160,6 +160,20 @@ Panel description: as above.
 
 Simulation details: ```run_wetro_2020v2.m```. Videos saved as ```MATLAB/mov/wetro3_Nk=100_Tend=1000.avi``` and ```MATLAB/mov/wetro4_Nk=100_Tend=1000.avi```. Number of elements Nk = 100 implies a grid-size of 5.2 cm.
 
-#### Other comments
+#### Other comments [both implemented in ```run_wetro_2020v3.m```
 * Ensuring inflow/outflow at boundaries: try steep bed slope at boundaries.
-* Save the rainfall data for valid comparison between simulations.
+* Save the rainfall data for valid comparison between simulations. 
+
+### Wetropolis: testing the "infinite reservoir" for buffer capacity
+
+#### Summary
+Starting from 'entire system v2' above, these simulations introduce two new steps: (i) using the same simulated random rainfall for repeated experiments; and (ii) exploiting the identical rainfall time series to test whether the reservoir has enough storage capacity to buffer the flood peak. This is achieved simply by setting Qres(t) = 0 for all t; this means that the reservoir level rises indefinitely -- the "infinite reservoir" -- due to zero outflow into the river channel and canal at s_res.
+
+The following two figures are snapshots at t=1000 (i.e., the end of the simulation) from the Wetropolis dashboard: the first is a standard run (''entire system v2') with 100 days' rainfall data saved as ```MATLAB/raindata/rain#3_tmax=1000.mat```; the second uses the same rainfall data but with Qres(t) = 0 for all t.
+
+##### Standard run
+![control](figs/mov/wetro5rain#3_Nk=100_Tend=1000.png)
+
+##### Infinite reservoir
+![infinte reservoir](figs/wetro5rain#3_infres_Nk=100_Tend=1000.png)
+
