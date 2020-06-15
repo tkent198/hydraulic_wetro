@@ -128,11 +128,11 @@ Simulation details: ```run_wetro_2020v2.m```. Video saved as ```MATLAB/mov/wetro
 
 ```
 if Rr(t) = 18r0:
-  		 Pwr  = 0.02
+  	Pwr  = 0.02
 else: 
-		Pwr = 0.01
+	Pwr = 0.01
  ```
-
+NOTE: as a first check to see if the reservoir has enough storage capacity to buffer the flood peak, set Qres(t) = 0 for all t. 
 * EnKF for river dynamics and parameter estimation (see, e.g., Liz Cooper's recent work). In practice many parameters are poorly understood (Manning coeff, inflow rate, portion of outflow to canal/river etc.). 
  
 ### Wetropolis: fully-coupled v2
