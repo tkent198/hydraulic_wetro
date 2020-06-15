@@ -124,13 +124,14 @@ Simulation details: ```run_wetro_2020v2.m```. Video saved as ```MATLAB/mov/wetro
 ***Note:*** moor and reservoir coupling in the code is actually inconsistent with physical set-up. In the above simulations: the reservoir is coupled to the river channel only at s=0.932m; the moor is coupled to the river channel at s = 2.038m and canal at s = 0.932m (mathematically/numerically this is allowed, but makes little sense in reality -- unless a pipe carries partial outflow instantaneously from the moor to the reservoir location!). Note also that the actual Wetropolis river channel has length L=5.2m.
 
 #### Other comments
-* On a basic flood control experiment: constrain river depth to be less than hT = 0.02m in city by, e.g., turning off reservoir outflow (i.e., raise the weir height from 0.01m so reservoir acts as storage buffer during high rainfall, then lower weir height as rainfall lessens). This could be implemented in a straightforward but crude way as follows. 
+* On a basic flood control experiment: constrain river depth to be less than hT = 0.02m in city by, e.g., temporarily turning off reservoir outflow (i.e., raise the weir height from 0.1m so reservoir acts as storage buffer during high rainfall, then lower weir height as rainfall lessens). This could be implemented in a straightforward but crude way as follows. 
 
 ```
-if Rr(t) = 18r0:
-  	Pwr  = 0.02
-else: 
-	Pwr = 0.01
+if Rr(t) = 9*r0
+  	Pwr  = 0.3
+else
+	Pwr = 0.1
+end
  ```
 NOTE: as a first check to see if the reservoir has enough storage capacity to buffer the flood peak, set Qres(t) = 0 for all t. 
 * EnKF for river dynamics and parameter estimation (see, e.g., Liz Cooper's recent work). In practice many parameters are poorly understood (Manning coeff, inflow rate, portion of outflow to canal/river etc.). 
@@ -140,8 +141,8 @@ NOTE: as a first check to see if the reservoir has enough storage capacity to bu
 #### Summary
 As above but with the following developments:
 * The inconsistencies with the physical set-up are addressed. The reservoir flows partially into the canal and partially into the river channel at s_res; the moor flows into the river channel only at s_m. Length of domain is 5.2m and city region is slightly extended.
-* Groundwater coupling: two implementations. (i) directly to river channel (so that left boundary depth of moor is the same as river depth at that location); (ii) to river channel via a connecting canal (more realistic). 
-* Groundwater model: (i) FD or (ii) FEM model. See material in ```groundwater```  folder for more info on FEM and the connecting canal.
+* Groundwater coupling: two implementations. (i) directly to river channel (so that left boundary depth of moor is the same as river depth at that location); (ii) to river channel via a connecting canal (more realistic). Groundwater model: (i) FD or (ii) FEM model. See material in ```groundwater```  folder for more info on FEM and the connecting canal.
+* Initially, canal water levels are that same as their respective weir heights; reservoir is empty. So, canal water levels are steady until the reservoir fills up to its weir height Pwr = 0.1.
 
 #### Plots
 
