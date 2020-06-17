@@ -132,6 +132,7 @@ fill([chan.LR1, chan.LR2,chan.LR2,chan.LR1],[0,0,geom.hc,geom.hc],...
 hold off;
 % text(0.85*xmax,0.9*hmax,['t=',num2str(tn)]);
 axis([0 L 0.01 0.03]);
+% axis([0 L 0.5e-3 1.5e-3]); %limits for A
 xlabel('s','fontsize',fs); ylabel('h(s,t)','fontsize',fs);
 title([]);
 
@@ -187,7 +188,7 @@ xlabel('Rain / wd', 'fontsize',fs);
 ylabel('Density', 'fontsize',fs);
 axis([-0.5 20 0 0.4]);
 
-%% Stage-discharge relationship (rating curve?) in city 
+%% Stage-discharge relationship (to fit rating curve?) in city 
 % subplot(2,6,8);
 % subplot(2,5,5);
 subaxis(nrow,ncol,pQh, 'Spacing', sp, 'Padding', pa, 'Margin', ma);

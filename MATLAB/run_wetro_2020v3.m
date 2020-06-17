@@ -12,7 +12,7 @@
 % > clean up code: lots of redundant parts and repetition. DONE/ongoing.
 % > Advanced groundwater model (FEM) with connecting channel. PARTIALLY
 % DONE, needs checking.
-% > save rainfall data for repeat experiments 
+% > save rainfall data for repeat experiments. DONE.
 % > BCs: steep bedslope at boundaries to enforce inflow/outflow via
 % numerical flux?
 % > EnKF for river model?
@@ -24,7 +24,7 @@ clear;
 nparaflag = 2; % 1 is Onno's original design case; 2 is Luke/Onno/real case of parameter choice'
 VIDEO = 0; % 0 to run without saving a vid, 1 to save.
 RAINSAVE = 0; % 1 to save randomly-generated rainfall, 0 to not save
-RAINLOAD = 0; % 1 to load saved rainfall (must specify file name), 0 
+RAINLOAD = 1; % 1 to load saved rainfall (must specify file name), 0 
 %% Canal
 % Canal: s=0,..., Lc3 (lock 3), s=Lc3, ..., Lc2 (lock 2), s=Lc2,..., Lc1 (lock 1 into river)
 % (a) Simple kinetic model with variables: h1=h1(t) in 1st, h2=h2(t) in 2nd section canal section
@@ -122,7 +122,7 @@ Neq = 2; % U = (A, Au)
 
 %%%----- Set up grid with curvilinear coord s -----%%%
 L=chan.LR3; %length of domain
-Nk=500; %number of gridcells (excluding ghost)
+Nk=100; %number of gridcells (excluding ghost)
 Nf=Nk+1; %number of nodes
 Kk=L/Nk; %length of cell
 s=0:Kk:L;%node location
@@ -137,7 +137,7 @@ index_r = find(s > chan.s_r);
 
 % test steep bed at s=0,L for inflow/outflow boundaries?
 dbds_vec = geom.dbds*ones(1,Nk+2);
-jj = 3; % how many cells to steepen at either end?
+jj = 1; % how many cells to steepen at either end?
 dbBC = -10.0; % steepness?
 dbds_vec(1:jj) = dbBC; 
 dbds_vec(end-jj+1:end) = dbBC;
@@ -378,21 +378,21 @@ nrainc = 1;
 ncc = 0;
 %% Video? Save?
 
-if (RAINSAVE == 1)
-    
-    % make directory path
-    outdirs = strcat(pwd, {'/'}, 'raindata/');
-    outdirs = strjoin(outdirs);
-    
-    Tstr = strrep(num2str(Tend), '.', '_');
-    
-    outnames = sprintf('rain#1_tmax=%s',Tstr);
-    
-end
+% if (RAINSAVE == 1)
+%     
+%     % make directory path
+%     outdirs = strcat(pwd, {'/'}, 'raindata/');
+%     outdirs = strjoin(outdirs);
+%     
+%     Tstr = strrep(num2str(Tend), '.', '_');
+%     
+%     outnames = sprintf('rain#2_tmax=%s',Tstr);
+%     
+% end
 
 if (RAINLOAD == 1)
     
-    rain = load('raindata/rain#1_tmax=1000.mat');
+    rain = load('raindata/rain#3_tmax=1000.mat');
     Rmload = rain.raindata.rainm;
     Rrload = rain.raindata.rainr;    
     
@@ -407,7 +407,7 @@ if (VIDEO == 1)
     res = num2str(Nk);
     Tstr = strrep(num2str(Tend), '.', '_');
     
-    outnamev = sprintf('wetro5_Nk=%s_Tend=%s',res,Trt);
+    outnamev = sprintf('wetro5rain#3_infres_Nk=%s_Tend=%s',res,Tstr);
     outnamev = strcat(outdirv,outnamev);
     v = VideoWriter(outnamev);
     v.FrameRate = 5;
@@ -486,8 +486,14 @@ while (tijd  <= Tend) % All simple explicit time stepping
                 ncc = ncc+1;
                 tunit  = tunit+TimeUnit;
                 
-                Rm = Rmload(:,ncc)/Rain0;
-                Rr = Rrload(:,ncc)/Rain0;
+                Rm = Rmload(:,ncc);
+                Rr = Rrload(:,ncc);
+                
+                not = Rm(1) + Rr(1);
+                nchisto(ncc) = not;
+                
+                Rm = transpose(Rm)*Rain0;
+                Rr = transpose(Rr)*Rain0;
                 
             end
             
@@ -504,8 +510,14 @@ while (tijd  <= Tend) % All simple explicit time stepping
     end
     
     
+     %% very crude flood control by reservoir storage
+%     
+%     if (Rr(1) == 9*Rain0)
+%         Pwr = 0.2;
+%     else
+%         Pwr = 0.1;
+%     end
     %%
-    
     % River: determine hydraulic radius, h and dh/dA for time step restrictions
     % and numerical flux 
     [h(1), dhdA(1)] = xsec_hAs(U(1,1),0.5*(-Kk+0),geom,chan);
@@ -545,6 +557,7 @@ while (tijd  <= Tend) % All simple explicit time stepping
     %
     hreso = hres;
     Qresw = Cf*wres*sqrt(g)*max(hreso-Pwr,0)^(3/2);
+%     Qresw = 0.0; % "infinite reservoir" -- sufficient for flood control?
     hres = hreso+dt*Rr(1)-(dt/(Lyy*wres))*Qresw;
     
     %% Update groundwater model (moor)
@@ -654,15 +667,27 @@ while (tijd  <= Tend) % All simple explicit time stepping
         [h(j), dhdA(j)] = xsec_hAs(U(1,j),0.5*(s(j-1)+s(j)),geom,chan);
         [area(j), Wp(j), Rh(j)] = xsec_Ahs(h(j),0.5*(s(j-1)+s(j)),geom,chan);
     end
+       
+    %%% P fluxes as per the NCP theory
+    Pp = 0.5*VNC + Flux;
+    Pm = -0.5*VNC + Flux;
     
     %%%----- compute extraneous forcing terms S(U) -----%%%
     S(1,:) = 0;
     S(2,:) = -geom.g*U(1,:)*geom.dbds - geom.g*geom.Cm^2*U(2,:).*abs(U(2,:)./U(1,:))./Rh.^(4/3);
     S(2,:) = -geom.g*U(1,:).*dbds_vec - geom.g*geom.Cm^2*U(2,:).*abs(U(2,:)./U(1,:))./Rh.^(4/3);
     
-    %%% P fluxes as per the NCP theory
-    Pp = 0.5*VNC + Flux;
-    Pm = -0.5*VNC + Flux;
+    % Does it matter if inflow is updated here or later?
+    
+%     % Area: update point source terms S_A
+%     U(1,nxsm) = U(1,nxsm) + dt*(1-gam_m)*Qcm/Kk; % moor inflow
+%     U(1,nxsr) = U(1,nxsr) + dt*(1-gam_r)*Qresw/Kk; % res inflow 
+%     U(1,nxLc1)= U(1,nxLc1) + nswitch2*dt*Qc1/Kk; % canal 1 inflow
+%     
+%     % Discharge: update point source term --- u*S_A
+%     U(2,nxsm) = U(2,nxsm) + (U(2,nxsm)/U(1,nxsm))*dt*(1-gam_m)*Qcm/Kk; % moor inflow 
+%     U(2,nxsr) = U(2,nxsr) + (U(2,nxsr)/U(1,nxsr))*dt*(1-gam_r)*Qresw/Kk; % res inflow
+%     U(2,nxLc1)= U(2,nxLc1)+ (U(2,nxLc1)/U(1,nxLc1))*dt*nswitch2*Qc1/Kk; % canal 1 inflow
     
     %%%----- integrate forward to next time level -----%%% 
     
@@ -697,7 +722,7 @@ while (tijd  <= Tend) % All simple explicit time stepping
     % Area: update point source terms S_A
     UU(1,nxsm) = UU(1,nxsm) + dt*(1-gam_m)*Qcm/Kk; % moor inflow
     UU(1,nxsr) = UU(1,nxsr) + dt*(1-gam_r)*Qresw/Kk; % res inflow 
-    UU(1,nxLc1)= UU(1,nxLc1)+ nswitch2*dt*Qc1/Kk; % canal 1 inflow
+    UU(1,nxLc1)= UU(1,nxLc1) + nswitch2*dt*Qc1/Kk; % canal 1 inflow
     
     % Discharge: update point source term --- u*S_A
     UU(2,nxsm) = UU(2,nxsm) + (UU(2,nxsm)/UU(1,nxsm))*dt*(1-gam_m)*Qcm/Kk; % moor inflow 
@@ -750,7 +775,15 @@ if (VIDEO == 1)
     close(v);
 end
 
-if (SAVE == 1)
+if (RAINSAVE == 1)
+    
+    % make directory path
+    outdirs = strcat(pwd, {'/'}, 'raindata/');
+    outdirs = strjoin(outdirs);
+    
+    Tstr = strrep(num2str(Tend), '.', '_');
+    
+    outnames = sprintf('rain#3_tmax=%s',Tstr);
     
     raindata.rainm = rainm_save;
     raindata.rainr = rainr_save;
