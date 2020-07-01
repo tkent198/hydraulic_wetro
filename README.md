@@ -181,6 +181,7 @@ The following two figures are snapshots at t=1000 (i.e., the end of the simulati
 First note that this rainfall data ```rain#3``` has below-average extremes, with only one day of 18r0 (see first two panels). In the standard run:
 * there are two flood peaks around t=300 and t=600, the first following 2x9r0 (both) and the second following a number of days of 2x4r0 (both) and 8r0 (moor). 
 * Key question: are one or both of these flood peaks mitigated by reservoir storage only?
+
 In the infinite reservoir:
 * the first flood peak (following 18r0) is mitigated completely with the river level remaining < 0.02 in the city;
 * the second flood peak is reduced but some flooding still occurs. 
