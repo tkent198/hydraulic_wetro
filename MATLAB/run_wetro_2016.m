@@ -6,7 +6,7 @@
 
 %  - clearer sections
 %  - indentation and space
-%  - plots: relabelling and added legends to plots -- NOTE: mem and spped issue with
+%  - plots: relabelling and added legends to plots -- NOTE: mem and speed issue with
 %  live-plotting and legends.
  
  
@@ -293,7 +293,7 @@ while (tijd  <= Tend) % All simple explicit time stepping
     Vr = (wr*hr(1:Nx)./(2*hr(1:Nx)+wr)).^(2/3)*sqrt(-dbdxmean)/Cm; % velocity
     dt2 = dx/max(abs(Vr)); %dt river
     dt = dy^2/(alph*g*max(hmg,0.001)); %dt moor?
-    dt = 0.35*min(dt,dt2) % take min timestep CFL = 0.35
+    dt = 0.35*min(dt,dt2); % take min timestep CFL = 0.35
     
     tijd = tijd+dt;
     

@@ -313,7 +313,7 @@ rainpdf = [16,24,77,89,35,8,7]/256;
 
 tplot = 100;
 Tend = tplot*TimeUnit;
-dtmeas = 1.*TimeUnit;
+dtmeas = 1*TimeUnit;
 tmeas = dtmeas;
 tijd = 0;
 % nmeas = dtmeas/dt;
@@ -407,7 +407,7 @@ if (VIDEO == 1)
     res = num2str(Nk);
     Tstr = strrep(num2str(Tend), '.', '_');
     
-    outnamev = sprintf('wetro5rain#3_infres_Nk=%s_Tend=%s',res,Tstr);
+    outnamev = sprintf('wetro5rain#3_Auzerosource_Nk=%s_Tend=%s',res,Tstr);
     outnamev = strcat(outdirv,outnamev);
     v = VideoWriter(outnamev);
     v.FrameRate = 5;
@@ -417,7 +417,7 @@ if (VIDEO == 1)
 end
 
 %% Step forward in time...
-CFL = 0.3; % CFL number for stable time-stepping
+CFL = 0.5; % CFL number for stable time-stepping
 while (tijd  <= Tend) % All simple explicit time stepping
     %% Rainfall
     switch nrainc
@@ -520,11 +520,12 @@ while (tijd  <= Tend) % All simple explicit time stepping
     %%
     % River: determine hydraulic radius, h and dh/dA for time step restrictions
     % and numerical flux 
+    % Ghosts:
     [h(1), dhdA(1)] = xsec_hAs(U(1,1),0.5*(-Kk+0),geom,chan);
     [h(Nk+2), dhdA(Nk+2)] = xsec_hAs(U(1,Nk+2),0.5*(L+L+Kk),geom,chan);
     [area(1), Wp(1), Rh(1)] = xsec_Ahs(h(1),0.5*(-Kk+0),geom,chan);
     [area(Nk+2), Wp(Nk+2), Rh(Nk+2)] = xsec_Ahs(h(Nk+2),0.5*(L+L+Kk),geom,chan);
-    
+    % Interiors:
     for j = 2:Nk+1
         [h(j), dhdA(j)] = xsec_hAs(U(1,j),0.5*(s(j-1)+s(j)),geom,chan);
         [area(j), Wp(j), Rh(j)] = xsec_Ahs(h(j),0.5*(s(j-1)+s(j)),geom,chan);
@@ -658,15 +659,15 @@ while (tijd  <= Tend) % All simple explicit time stepping
     end
     
     %%%----- Determine hydraulic radius, h and dh/dA -----%%%
-    [h(1), dhdA(1)] = xsec_hAs(U(1,1),0.5*(-Kk+0),geom,chan);
-    [h(Nk+2), dhdA(Nk+2)] = xsec_hAs(U(1,Nk+2),0.5*(L+L+Kk),geom,chan);
-    [area(1), Wp(1), Rh(1)] = xsec_Ahs(h(1),0.5*(-Kk+0),geom,chan);
-    [area(Nk+2), Wp(Nk+2), Rh(Nk+2)] = xsec_Ahs(h(Nk+2),0.5*(L+L+Kk),geom,chan); 
-        
-    for j = 2:Nk+1
-        [h(j), dhdA(j)] = xsec_hAs(U(1,j),0.5*(s(j-1)+s(j)),geom,chan);
-        [area(j), Wp(j), Rh(j)] = xsec_Ahs(h(j),0.5*(s(j-1)+s(j)),geom,chan);
-    end
+%     [h(1), dhdA(1)] = xsec_hAs(U(1,1),0.5*(-Kk+0),geom,chan);
+%     [h(Nk+2), dhdA(Nk+2)] = xsec_hAs(U(1,Nk+2),0.5*(L+L+Kk),geom,chan);
+%     [area(1), Wp(1), Rh(1)] = xsec_Ahs(h(1),0.5*(-Kk+0),geom,chan);
+%     [area(Nk+2), Wp(Nk+2), Rh(Nk+2)] = xsec_Ahs(h(Nk+2),0.5*(L+L+Kk),geom,chan); 
+%         
+%     for j = 2:Nk+1
+%         [h(j), dhdA(j)] = xsec_hAs(U(1,j),0.5*(s(j-1)+s(j)),geom,chan);
+%         [area(j), Wp(j), Rh(j)] = xsec_Ahs(h(j),0.5*(s(j-1)+s(j)),geom,chan);
+%     end
        
     %%% P fluxes as per the NCP theory
     Pp = 0.5*VNC + Flux;
@@ -677,7 +678,10 @@ while (tijd  <= Tend) % All simple explicit time stepping
     S(2,:) = -geom.g*U(1,:)*geom.dbds - geom.g*geom.Cm^2*U(2,:).*abs(U(2,:)./U(1,:))./Rh.^(4/3);
     S(2,:) = -geom.g*U(1,:).*dbds_vec - geom.g*geom.Cm^2*U(2,:).*abs(U(2,:)./U(1,:))./Rh.^(4/3);
     
-    % Does it matter if inflow is updated here or later?
+    %%%----- integrate forward to next time level -----%%% 
+    
+    % Does it matter if inflow is updated here or after the homog. part of the PDE is updated? 
+    % NO, from inspecting simulations.
     
 %     % Area: update point source terms S_A
 %     U(1,nxsm) = U(1,nxsm) + dt*(1-gam_m)*Qcm/Kk; % moor inflow
@@ -689,7 +693,6 @@ while (tijd  <= Tend) % All simple explicit time stepping
 %     U(2,nxsr) = U(2,nxsr) + (U(2,nxsr)/U(1,nxsr))*dt*(1-gam_r)*Qresw/Kk; % res inflow
 %     U(2,nxLc1)= U(2,nxLc1)+ (U(2,nxLc1)/U(1,nxLc1))*dt*nswitch2*Qc1/Kk; % canal 1 inflow
     
-    %%%----- integrate forward to next time level -----%%% 
     
     if (BC == 1) % periodic
         

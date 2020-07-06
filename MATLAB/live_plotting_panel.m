@@ -119,9 +119,10 @@ ylabel('Rainfall factor', 'fontsize',fs);
 % subplot(2,6,[11 12]);
 % subplot(2,5,9);
 subaxis(nrow,ncol,ph, 'Spacing', sp, 'Padding', pa, 'Margin', ma);
-for k = 1:(length(s)-1)
-    plot([s(k), s(k+1)],[h(k+1),h(k+1)],'b-', 'Linewidth',1); hold on;
-end
+% for k = 1:(length(s)-1)
+%     plot([s(k), s(k+1)],[h(k+1),h(k+1)],'b-', 'Linewidth',1); hold on;
+% end
+plot([s(1:end-1); s(2:end)],[h(2:end-1); h(2:end-1)],'b-', 'Linewidth',1); hold on;
 plot([chan.s_r, chan.s_r],[0,0.04],'r:'); hold on;
 plot([chan.s_m, chan.s_m],[0,0.04],'r:'); hold on;
 plot([Lc1, Lc1],[0,0.04],'r:'); hold on;
@@ -141,9 +142,10 @@ title([]);
 % subplot(2,6,[5 6]);
 % subplot(2,5,10);
 subaxis(nrow,ncol,pAu, 'Spacing', sp, 'Padding', pa, 'Margin', ma);
-for k = 1:(length(s)-1)
-    plot([s(k), s(k+1)],[Au(k+1),Au(k+1)],'b-', 'Linewidth',1); hold on;
-end
+% for k = 1:(length(s)-1)
+%     plot([s(k), s(k+1)],[Au(k+1),Au(k+1)],'b-', 'Linewidth',1); hold on;
+% end
+plot([s(1:end-1); s(2:end)],[Au(2:end-1); Au(2:end-1)],'b-', 'Linewidth',1); hold on;
 plot([chan.s_r, chan.s_r],[0,0.04],'r:'); hold on;
 plot([chan.s_m, chan.s_m],[0,0.04],'r:'); hold on;
 plot([Lc1, Lc1],[0,0.04],'r:'); hold on;
@@ -221,3 +223,4 @@ drawnow; pause(0.01);
 %         xlabel('x [m]', 'fontsize',fs);
 %         ylabel('Height z [m]', 'fontsize',fs);
 %         ylim([0,0.07]);
+
