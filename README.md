@@ -80,6 +80,7 @@ File name                   |  Summary
 ```run_wetro_2016.m```	| New ver of OB's original ```tabletop2v2016.m```
 ```run_wetro_2020.m```	| Run Wetropolis with updated St. Venant river system: first implementation working
 ```run_wetro_2020v2.m``` | Run Wetropolis with updated St. Venant river system: improvements
+```run_wetro_2020v3.m``` | Run Wetropolis with updated St. Venant river system: save rain data with load option
 ```live_plotting_routine.m``` | Separate plotting routine, called by ```run_wetro_2020v2.m```
 
 ### Python
@@ -87,12 +88,15 @@ File name                   |  Summary
 File/dir name                   |  Summary
 :--------------------------:|:--------------------------:
 ```main_wetro_run.py```         | Main run script for initial test case
+```main_wetro_fullsyst.py```    | Main run script for full system: 1st implementation
 ```init_cond.py```              | Initial condition functions
 ```flux_function.py```          | Numerical flux calculation for space discretisation
 ```cross_sections.py```         | Compute cross-sections h(A,s) and A(h,s)
-```plot_wetro.py```             | Plotting routine
-```/configs```                  | Dir for config files
-```/configs/config#1.py``` etc. | Config file containing parameters
+```plot_wetro.py```             | Plotting routine for data generated in main scripts
+```random_rainfall.py```     | Test script for generating and plotting random rainfall
+```/configs```                  | Dir for config files:
+```/configs/config#1.py``` etc. | Parameters for test case
+```/configs/config#2.py``` etc. | Parameters for full system v1
 
 
 ## Preliminary simulations 
@@ -167,7 +171,7 @@ Simulation details: ```run_wetro_2020v2.m```. Videos saved as ```MATLAB/mov/wetr
 ### Wetropolis: testing the "infinite reservoir" for buffer capacity
 
 #### Summary
-Starting from 'entire system v2' above, these simulations introduce two new steps: (i) using the same simulated random rainfall for repeated experiments; and (ii) exploiting the identical rainfall time series to test whether the reservoir has enough storage capacity to buffer the flood peak. This is achieved simply by setting Qres(t) = 0 for all t; this means that the reservoir level rises indefinitely -- the "infinite reservoir" -- due to zero outflow into the river channel and canal at s_res.
+Starting from 'entire system v2' above, these simulations introduce two new steps: (i) using the same simulated random rainfall for repeated experiments; and (ii) exploiting the identical rainfall time series to test whether the reservoir has enough storage capacity to buffer the flood peak(s). This is achieved simply by setting Qres(t) = 0 for all t; this means that the reservoir level rises indefinitely -- the "infinite reservoir" -- due to zero outflow into the river channel and canal at s_res.
 
 The following two figures are snapshots at t=1000 (i.e., the end of the simulation) from the Wetropolis dashboard: the first is a standard run (''entire system v2') with 100 days' rainfall data saved as ```MATLAB/raindata/rain#3_tmax=1000.mat```; the second uses the same rainfall data but with Qres(t) = 0 for all t.
 
