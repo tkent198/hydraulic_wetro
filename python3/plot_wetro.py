@@ -12,6 +12,7 @@ import errno
 import sys
 import importlib.util
 import matplotlib.pyplot as plt
+from matplotlib import animation
 
 ##################################################################
 # CUSTOM MODULES REQUIRED
@@ -31,7 +32,7 @@ spec.loader.exec_module(config)
 hr = config.hr
 wr = config.wr
 hf = config.hf
-hc = hr+hf 
+hc = hr+hf
 wf = config.wf
 wc = config.wc
 tana = config.tana
@@ -40,23 +41,23 @@ LR2 = config.LR2
 LR3 = config.LR3
 LR11 = config.LR11
 LR22 = config.LR22
-tr = config.tr  
+tr = config.tr
 s_r = config.s_r
 s_m = config.s_m
 dbds = config.dbds
 g = config.g
 Cm = config.Cm
 Neq = config.Neq
-ic = config.ic 
+ic = config.ic
 cfl = config.cfl
 BC = config.BC
 
 ##################################################################
-# Set up dirs  
+# Set up dirs
 ##################################################################
 outdir = config.outdir
 cwd = os.getcwd()
-dirn = str(cwd+outdir)      
+dirn = str(cwd+outdir)
 try:
     os.makedirs(dirn)
 except OSError as exception:
@@ -64,7 +65,7 @@ except OSError as exception:
         raise
 
 ##################################################################
-# Set up grid  
+# Set up grid
 ##################################################################
 
 L=LR3 #length of domain
@@ -73,7 +74,7 @@ Nk = int(Nk)
 Nf=Nk+1 #number of nodes
 Kk=L/Nk #length of cell
 
-s = np.linspace(0, L, Nk+1) 
+s = np.linspace(0, L, Nk+1)
 sBC = np.linspace(-Kk, L+Kk, Nk+3)  #node loc with ghosts
 
 # locating floodplain/city
@@ -94,6 +95,7 @@ Nmeas = config.Nmeas
 dtmeasure = tmax/Nmeas
 tmeasure = dtmeasure
 timevec = np.linspace(tn,tmax,Nmeas+1)
+
 
 ##################################################################
 # Define system arrays with ghost cells for BCs
@@ -119,22 +121,17 @@ Z_array = np.load(str(dirn+'/Z_array.npy'))
 
 
 ##################################################################
-# Plotting
+# Plotting at times T
 ##################################################################
-T=59
-h =  h_array[:,:,T][0]
-A =  U_array[0,:,T]
-Au =  U_array[1,:,T]
+T = tn
 
 fp = index_fp[50]
 ct = index_city[5]
- 
-fig, axes = plt.subplots(2, 2, figsize=(15,10))
 
+# plt.ion() ## Note this correction
 
-for k in range(0,len(s)-1):
-    axes[0,0].plot([s[k], s[k+1]],[h[k+1],h[k+1]],'b', linewidth = 1.0)
-    
+fig, axes = plt.subplots(2, 2, figsize=(12,8))
+
 axes[0,0].plot([s[fp], s[fp]],[0,0.04],'k:')
 axes[0,0].plot([s[ct], s[ct]],[0,0.04],'k:')
 axes[0,0].fill([config.LR1, config.LR2,config.LR2,config.LR1],[0,0,config.hc,config.hc],'r',alpha=0.1,linestyle='None')
@@ -142,27 +139,39 @@ axes[0,0].fill([config.LR1, config.LR2,config.LR2,config.LR1],[0,0,config.hc,con
 axes[0,0].set_ylim([0,0.04])
 axes[0,0].set_xlim([0,L])
 axes[0,0].set_ylabel('$h(s,t)$',fontsize=14)
-axes[0,0].set_xlabel('$s$',fontsize=14)  
+axes[0,0].set_xlabel('$s$',fontsize=14)
 
-for k in range(0,len(s)-1):
-    axes[0,1].plot([s[k], s[k+1]],[Au[k+1],Au[k+1]],'b', linewidth = 1.0)
-#    axes[0,1].fill([config.LR1, config.LR2,config.LR2,config.LR1],[0,0,config.hc,config.hc],'r',alpha=0.1,linestyle='None')
 axes[0,1].set_ylim([0,0.0006])
 axes[0,1].set_xlim([0,L])
 axes[0,1].set_ylabel('$Au(s,t)$',fontsize=14)
 axes[0,1].set_xlabel('$s$',fontsize=14)
 
-X,Y,Xc,Yc,__ = plot_xsec_hAs(A[fp+1],s[fp],config)
-axes[1,0].plot(Xc,Yc,'k', linewidth=2.0)
-axes[1,0].fill(X,Y,'b',alpha=0.1)
-axes[1,0].text(Xc[-1],0.5*config.hr,'$t=%.3g$' %timevec[T], fontsize=14, horizontalalignment='right')
-axes[1,0].text(Xc[-1],0.25*config.hr,'$s=%.3g$' %s[fp],fontsize=14, horizontalalignment='right')
+while T < tmax:
 
-X,Y,Xc,Yc,__ = plot_xsec_hAs(A[ct+1],s[ct],config)
-axes[1,1].plot(Xc,Yc,'k', linewidth=2.0)
-axes[1,1].fill(X,Y,'b',alpha=0.1)
-axes[1,1].text(Xc[-1],0.5*config.hr,'$t=%.3g$' %timevec[T], fontsize=14, horizontalalignment='right')
-axes[1,1].text(Xc[-1],0.25*config.hr,'$s=%.3g$' %s[ct],fontsize=14, horizontalalignment='right')
+    h =  h_array[:,:,T][0]
+    A =  U_array[0,:,T]
+    Au =  U_array[1,:,T]
 
-plt.pause(0.01)
-plt.show()
+    # for k in range(0,len(s)-1):
+    #     axes[0,0].plot([s[k], s[k+1]],[h[k+1],h[k+1]],'b', linewidth = 1.0)
+    #     axes[0,1].plot([s[k], s[k+1]],[Au[k+1],Au[k+1]],'b', linewidth = 1.0)
+
+    axes[0,0].plot([s[:-1],s[1:]],[h[1:-1],h[1:-1]],'b', linewidth = 1.0)
+    axes[0,1].plot([s[:-1],s[1:]],[Au[1:-1],Au[1:-1]],'b', linewidth = 1.0)
+
+    X,Y,Xc,Yc,__ = plot_xsec_hAs(A[fp+1],s[fp],config)
+    axes[1,0].plot(Xc,Yc,'k', linewidth=2.0)
+    axes[1,0].fill(X,Y,'b',alpha=0.1)
+    axes[1,0].text(Xc[-1],0.5*config.hr,'$t=%.3g$' %timevec[T], fontsize=14, horizontalalignment='right')
+    axes[1,0].text(Xc[-1],0.25*config.hr,'$s=%.3g$' %s[fp],fontsize=14, horizontalalignment='right')
+
+    X,Y,Xc,Yc,__ = plot_xsec_hAs(A[ct+1],s[ct],config)
+    axes[1,1].plot(Xc,Yc,'k', linewidth=2.0)
+    axes[1,1].fill(X,Y,'b',alpha=0.1)
+    axes[1,1].text(Xc[-1],0.5*config.hr,'$t=%.3g$' %timevec[T], fontsize=14, horizontalalignment='right')
+    axes[1,1].text(Xc[-1],0.25*config.hr,'$s=%.3g$' %s[ct],fontsize=14, horizontalalignment='right')
+
+    T += 1
+
+    plt.pause(0.001)
+    plt.draw()
