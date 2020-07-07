@@ -91,7 +91,7 @@ plt.plot(rainfac,rainpdf,'ko')
 plt.xlabel('Rainfall amount')
 plt.ylabel('Probability')
 plt.title('Histogram of rainfall amounts')
-plt.xticks(rainfac, [rainfac])
+plt.xticks(rainfac, rainfac)
 # plt.xlim(0, 18)
 plt.show()
 '''

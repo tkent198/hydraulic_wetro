@@ -185,7 +185,7 @@ Lc1 = config.Lc1# distance along canal of first lock in m
 Lsec3 = config.Lsec3 # length third canal section in m
 Lsec2 = config.Lsec2 # length second canal section in m
 Lsec1 = config.Lsec1  # length first canal section
-wc = config.wc        # width of canal in m
+wc1 = config.wc1        # width of canal in m
 Pw3 = config.Pw3   # depth weir in canal section 3
 Pw2 = config.Pw2     # depth weir in canal section 2
 Pw1 = config.Pw1     # depth weir in canal section 1
@@ -317,7 +317,7 @@ while tn < tmax:
     # dt = cfl*min(dtr,dtm,dtAu)# take min timestep with CFL
     dt = cfl*min(dtm,dtAu) # take min timestep with CFL
 
-    ## debuggin time-step: resolved!
+    ## debuggin time-step: resolved! Typo in config file for moor parameters
     # print('hmg: ', hmg)
     # print('dtm: ', dtm)
     # print('dtAu: ', dtAu)
@@ -375,14 +375,14 @@ while tn < tmax:
     h1co = h1c
 
     # Outflows Q3c, Q2c, Q1c
-    Qc3 = wc*np.sqrt(g)*Cf*max(h3co-Pw3,0)**(3/2)
-    Qc2 = wc*np.sqrt(g)*Cf*max(h2co-Pw2,0)**(3/2)
-    Qc1 = wc*np.sqrt(g)*Cf*max(h1co-Pw1,0)**(3/2)
+    Qc3 = wc1*np.sqrt(g)*Cf*max( h3co-Pw3, 0 )**(3/2)
+    Qc2 = wc1*np.sqrt(g)*Cf*max( h2co-Pw2, 0 )**(3/2)
+    Qc1 = wc1*np.sqrt(g)*Cf*max( h1co-Pw1, 0 )**(3/2)
 
     # first order approximations
-    h3c = h3co + (dt/(Lsec3*wc))*( gam_r*Qresw - Qc3 )
-    h2c = h2co + (dt/(Lsec2*wc))*( Qc3 + gam_m*Qmoor - Qc2 ) # note: gam_m = 0 in real set-up
-    h1c = h1co + (dt/(Lsec1*wc))*( Qc2-Qc1 )
+    h3c = h3co + (dt/(Lsec3*wc1))*( gam_r*Qresw - Qc3 )
+    h2c = h2co + (dt/(Lsec2*wc1))*( Qc3 + gam_m*Qmoor - Qc2 ) # note: gam_m = 0 in real set-up
+    h1c = h1co + (dt/(Lsec1*wc1))*( Qc2-Qc1 )
 
     ##################################################################
     # River
@@ -453,7 +453,7 @@ while tn < tmax:
         fp = index_fp[60]
         ct = index_city[5]
 
-        plt.ion() ## Note this correction
+        # plt.ion() ## Note this correction
 
         fig, axes = plt.subplots(2, 2, figsize=(12,6))
 
@@ -465,8 +465,8 @@ while tn < tmax:
         axes[0,0].plot([Lc1, Lc1],[0,0.04],'k:')
         axes[0,0].set_ylim([0,0.04])
         axes[0,0].set_xlim([0,L])
-        axes[0,0].set_ylabel('$h(s,t)$',fontsize=14)
-        axes[0,0].set_xlabel('$s$',fontsize=14)
+        axes[0,0].set_ylabel('$h(s,t)$',fontsize=12)
+        axes[0,0].set_xlabel('$s$',fontsize=12)
         axes[0,0].plot([s[:-1],s[1:]],[h[1:-1],h[1:-1]],'b', linewidth = 1.0)
 
 
@@ -475,25 +475,24 @@ while tn < tmax:
         axes[0,1].plot([s_r, s_r],[0,0.04],'k:')
         axes[0,1].plot([s_m, s_m],[0,0.04],'k:')
         axes[0,1].plot([Lc1, Lc1],[0,0.04],'k:')
-        axes[0,1].set_ylabel('$Au(s,t)$',fontsize=14)
-        axes[0,1].set_xlabel('$s$',fontsize=14)
+        axes[0,1].set_ylabel('$Au(s,t)$',fontsize=12)
+        axes[0,1].set_xlabel('$s$',fontsize=12)
         axes[0,1].plot([s[:-1],s[1:]],[U[1,1:-1],U[1,1:-1]],'b', linewidth = 1.0)
 
         X,Y,Xc,Yc,__ = plot_xsec_hAs(U[0,fp+1],s[fp],config)
         axes[1,0].plot(Xc,Yc,'k', linewidth=2.0)
-        axes[1,0].fill(X,Y,'b',alpha=0.1)
-        axes[1,0].text(Xc[-1],0.5*config.hr,'$t=%.3g$' %tmeasure, fontsize=14, horizontalalignment='right')
-        axes[1,0].text(Xc[-1],0.25*config.hr,'$s=%.3g$' %s[fp],fontsize=14, horizontalalignment='right')
+        axes[1,0].fill(X,Y,'b',alpha=0.2)
+        axes[1,0].text(Xc[-1],0.5*config.hr,'$t=%.3g$' %tmeasure, fontsize=12, horizontalalignment='right')
+        axes[1,0].text(Xc[-1],0.25*config.hr,'$s=%.3g$' %s[fp],fontsize=12, horizontalalignment='right')
 
         X,Y,Xc,Yc,__ = plot_xsec_hAs(U[0,ct+1],s[ct],config)
         axes[1,1].plot(Xc,Yc,'k', linewidth=2.0)
-        axes[1,1].fill(X,Y,'b',alpha=0.1)
-        axes[1,1].text(Xc[-1],0.5*config.hr,'$t=%.3g$' %tmeasure, fontsize=14, horizontalalignment='right')
-        axes[1,1].text(Xc[-1],0.25*config.hr,'$s=%.3g$' %s[ct],fontsize=14, horizontalalignment='right')
+        axes[1,1].fill(X,Y,'b',alpha=0.2)
+        axes[1,1].text(Xc[-1],0.5*config.hr,'$t=%.3g$' %tmeasure, fontsize=12, horizontalalignment='right')
+        axes[1,1].text(Xc[-1],0.25*config.hr,'$s=%.3g$' %s[ct],fontsize=12, horizontalalignment='right')
 
-
+        plt.show()
         plt.pause(0.1)
-        plt.draw()
 
         index += 1
         tmeasure += dtmeasure
