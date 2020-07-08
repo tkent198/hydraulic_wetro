@@ -173,5 +173,5 @@ while T < tmax:
 
     T += 1
 
-    plt.pause(0.001)
-    plt.draw()
+    plt.show()
+    plt.pause(0.1)

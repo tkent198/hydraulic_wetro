@@ -194,9 +194,9 @@ Hcc3 = config.Hcc3 # dike height along canal segment 3
 Hcc2 = config.Hcc2 # dike height along canal segment 2
 Hcc1 = config.Hcc1 # dike height along canal segment 1
 ## initial depths
-h1c0 = 0
-h2c0 = 0
-h3c0 = 0
+h1c0 = Pw1
+h2c0 = Pw2
+h3c0 = Pw3
 
 ##################################################################
 # Reservoir: mass ODE
@@ -205,7 +205,7 @@ gam_r = config.gam_r # proportion of water entering canal from res
 wres = config.wres # m
 Lres = config.Lres # length reservoir in m
 Pwr = config.Pwr # weir height
-hres0 = 0 # initial depth
+hres0 = Pwr # initial depth
 
 ##################################################################
 # Initialise full system
@@ -223,7 +223,7 @@ nxsr = int(np.floor(s_r/Kk)) # river gridcell in which res water is added
 nxsm = int(np.floor(s_m/Kk)) # river gridcell in which moor water is added
 nxLc1 = int(np.floor(Lc1/Kk)) #river gridcell in which canal-1 water is added
 
-# Random rainfall series in advance?
+# Random rainfall series in advance? see random_rainfall.py for some tests
 trand1_series = np.random.uniform(0,1,Nmeas)
 trand2_series = np.random.uniform(0,1,Nmeas)
 
@@ -232,6 +232,16 @@ trand2_series = np.random.uniform(0,1,Nmeas)
 ##################################################################
 tunit = 0
 ncc = 0
+
+Rmfac = [] #Rain factor moor
+Rrfac = [] #Rain factor res
+Rtfac = [] #Rain factor total
+Qct = [] #discharge at city location
+hct = [] #water depth at city location
+hc1 = [] #water depth canal-1
+hc2 = [] #water depth canal-2
+hc3 = [] #water depth canal-3
+h_res = [] #water depth Reservoir
 
 while tn < tmax:
 
@@ -284,6 +294,10 @@ while tn < tmax:
             nt = 0
             print('Location: none')
         print('Total factor: ', nt)
+
+        Rmfac = np.append(Rmfac,Rm[0]/Rain0)
+        Rrfac = np.append(Rrfac,Rr[0]/Rain0)
+        Rtfac = np.append(Rtfac,nt)
 
     ##################################################################
     # Time step: restrictions using wave speeds/velocities
@@ -432,7 +446,7 @@ while tn < tmax:
     # Discharge: update point source term from moor, res, canal --- u*S_A
     UU[1,nxsm] = UU[1,nxsm] + (UU[1,nxsm]/UU[0,nxsm])*dt*(1-gam_m)*Qcm/Kk # moor inflow
     UU[1,nxsr] = UU[1,nxsr] + (UU[1,nxsr]/UU[0,nxsr])*dt*(1-gam_r)*Qresw/Kk # res inflow
-    UU[1,nxLc1]= UU[1,nxLc1] + (UU[1,nxLc1]/UU[0,nxLc1])*dt*Qc1/Kk # canal 1 inflow
+    UU[1,nxLc1] = UU[1,nxLc1] + (UU[1,nxLc1]/UU[0,nxLc1])*dt*Qc1/Kk # canal 1 inflow
 
     # update arrays for A, Au and h
     U = UU
@@ -446,50 +460,113 @@ while tn < tmax:
 
     if tn > tmeasure:
 
+        fp = index_fp[60]
+        ct = index_city[5]
+
         U_array[:,:,index] = U
         h_array[:,:,index] = h
         Z_array[:,:,index] = h+B
 
-        fp = index_fp[60]
-        ct = index_city[5]
+        Qct = np.append(Qct,U[1,ct+1])
+        hct = np.append(hct,h[ct+1])
+        hc1 = np.append(hc1,h1c)
+        hc2 = np.append(hc2,h2c)
+        hc3 = np.append(hc3,h3c)
+        h_res = np.append(h_res, hres)
 
         # plt.ion() ## Note this correction
 
-        fig, axes = plt.subplots(2, 2, figsize=(12,6))
+        fig, axes = plt.subplots(3, 4, figsize=(13,7))#, constrained_layout=True)
 
-        axes[0,0].plot([s[fp], s[fp]],[0,0.04],'r:')
-        axes[0,0].plot([s[ct], s[ct]],[0,0.04],'r:')
-        axes[0,0].fill([config.LR1, config.LR2,config.LR2,config.LR1],[0,0,config.hc,config.hc],'r',alpha=0.1,linestyle='None')
-        axes[0,0].plot([s_r, s_r],[0,0.04],'k:')
-        axes[0,0].plot([s_m, s_m],[0,0.04],'k:')
-        axes[0,0].plot([Lc1, Lc1],[0,0.04],'k:')
-        axes[0,0].set_ylim([0,0.04])
-        axes[0,0].set_xlim([0,L])
-        axes[0,0].set_ylabel('$h(s,t)$',fontsize=12)
-        axes[0,0].set_xlabel('$s$',fontsize=12)
-        axes[0,0].plot([s[:-1],s[1:]],[h[1:-1],h[1:-1]],'b', linewidth = 1.0)
+        ## Rainfall: times series
+        axes[0,0].plot(Rmfac,'gx')
+        axes[0,0].plot(Rrfac,'r+')
+        axes[0,0].plot(Rtfac,'o', mfc='none')
+        axes[0,0].set_ylim(-0.5, 20)
+        axes[0,0].set_yticks(rainfac)
+        axes[0,0].set_yticklabels(rainfac)
+        # axes[0,2].set_xlim(0, tmeasure)
+
+        ## Rainfall: histogram
+        hist, bin_edges = np.histogram(Rtfac, bins = np.arange(0,20,1), density=True)
+        # print('hist', hist)
+        # print('bins', bin_edges)
+        bin_edges = np.round(bin_edges,0)
+        axes[0,1].bar(bin_edges[:-1], hist, width = 1, color='#0504aa',alpha=0.7)
+        # plt.xlim(min(bin_edges), max(bin_edges))
+        axes[0,1].plot(rainfac,rainpdf,'ko')
+        axes[0,1].set_xlabel('Rainfall amount')
+        axes[0,1].set_ylabel('Density')
+        # axes[1,2].title('Histogram of rainfall amounts')
+        axes[0,1].set_xlim(-1, 19)
+        axes[0,1].set_xticks(rainfac)
+        axes[0,1].set_xticklabels(rainfac)
 
 
-        axes[0,1].set_ylim([0,0.0006])
-        axes[0,1].set_xlim([0,L])
-        axes[0,1].plot([s_r, s_r],[0,0.04],'k:')
-        axes[0,1].plot([s_m, s_m],[0,0.04],'k:')
-        axes[0,1].plot([Lc1, Lc1],[0,0.04],'k:')
-        axes[0,1].set_ylabel('$Au(s,t)$',fontsize=12)
-        axes[0,1].set_xlabel('$s$',fontsize=12)
-        axes[0,1].plot([s[:-1],s[1:]],[U[1,1:-1],U[1,1:-1]],'b', linewidth = 1.0)
+        ## Moor
+        axes[1,0].plot(yy,hm)
 
+        ## h-Q relationship in city (a la rating curve)
+        axes[2,0].plot(hct,Qct,'x')
+        axes[2,0].plot([hc,hc],[0,0.0006],'r:')
+        axes[2,0].set_xlabel('h')
+        axes[2,0].set_ylabel('Q')
+        axes[2,0].set_xlim([0,0.04])
+        axes[2,0].set_ylim([0,0.0006])
+        axes[2,0].ticklabel_format(axis="x", style="sci", scilimits=(0,0))
+        axes[2,0].ticklabel_format(axis="y", style="sci", scilimits=(0,0))
+
+        ## Canals and res: time series
+        axes[1,1].plot(hc1,'1')
+        axes[1,1].plot(hc2,'2')
+        axes[1,1].plot(hc3,'3')
+        axes[1,1].plot(h_res/10,'*')
+
+        ## h(city) time series with flood threshold h_T
+        axes[2,1].plot([0,ncc-1],[hc, hc],'r--')
+        axes[2,1].plot(hct)
+        axes[2,1].set_ylim([0,0.04])
+
+        ## h(s,t)
+        axes[0,2].plot([s[fp], s[fp]],[0,0.04],'r:')
+        axes[0,2].plot([s[ct], s[ct]],[0,0.04],'r:')
+        axes[0,2].fill([config.LR1, config.LR2,config.LR2,config.LR1], [0,0,config.hc,config.hc],'r',alpha=0.1,linestyle='None')
+        axes[0,2].plot([s_r, s_r],[0,0.04],'k:')
+        axes[0,2].plot([s_m, s_m],[0,0.04],'k:')
+        axes[0,2].plot([Lc1, Lc1],[0,0.04],'k:')
+        axes[0,2].set_ylim([0,0.04])
+        axes[0,2].set_xlim([0,L])
+        axes[0,2].set_ylabel('$h(s,t)$',fontsize=12)
+        axes[0,2].set_xlabel('$s$',fontsize=12)
+        axes[0,2].plot([s[:-1],s[1:]],[h[1:-1],h[1:-1]],'b', linewidth = 1.0)
+        axes[0,2].ticklabel_format(axis="y", style="sci", scilimits=(0,0))
+
+        ## Au(s,t)
+        axes[1,2].set_ylim([0,0.0006])
+        axes[1,2].set_xlim([0,L])
+        axes[1,2].plot([s_r, s_r],[0,0.04],'k:')
+        axes[1,2].plot([s_m, s_m],[0,0.04],'k:')
+        axes[1,2].plot([Lc1, Lc1],[0,0.04],'k:')
+        axes[1,2].set_ylabel('$Au(s,t)$',fontsize=12)
+        axes[1,2].set_xlabel('$s$',fontsize=12)
+        axes[1,2].plot([s[:-1],s[1:]],[U[1,1:-1],U[1,1:-1]],'b', linewidth = 1.0)
+        axes[1,2].ticklabel_format(axis="y", style="sci", scilimits=(0,0))
+
+        ## h cross-section: floodplain
         X,Y,Xc,Yc,__ = plot_xsec_hAs(U[0,fp+1],s[fp],config)
-        axes[1,0].plot(Xc,Yc,'k', linewidth=2.0)
-        axes[1,0].fill(X,Y,'b',alpha=0.2)
-        axes[1,0].text(Xc[-1],0.5*config.hr,'$t=%.3g$' %tmeasure, fontsize=12, horizontalalignment='right')
-        axes[1,0].text(Xc[-1],0.25*config.hr,'$s=%.3g$' %s[fp],fontsize=12, horizontalalignment='right')
+        axes[2,2].plot(Xc,Yc,'k', linewidth=2.0)
+        axes[2,2].fill(X,Y,'b',alpha=0.2)
+        axes[2,2].text(Xc[-1],0.5*config.hr,'$t=%.3g$' %tmeasure, fontsize=12, horizontalalignment='right')
+        axes[2,2].text(Xc[-1],0.25*config.hr,'$s=%.3g$' %s[fp],fontsize=12, horizontalalignment='right')
 
+        ## h cross-section: city
         X,Y,Xc,Yc,__ = plot_xsec_hAs(U[0,ct+1],s[ct],config)
-        axes[1,1].plot(Xc,Yc,'k', linewidth=2.0)
-        axes[1,1].fill(X,Y,'b',alpha=0.2)
-        axes[1,1].text(Xc[-1],0.5*config.hr,'$t=%.3g$' %tmeasure, fontsize=12, horizontalalignment='right')
-        axes[1,1].text(Xc[-1],0.25*config.hr,'$s=%.3g$' %s[ct],fontsize=12, horizontalalignment='right')
+        axes[2,3].plot(Xc,Yc,'k', linewidth=2.0)
+        axes[2,3].fill(X,Y,'b',alpha=0.2)
+        axes[2,3].text(Xc[-1],0.5*config.hr,'$t=%.3g$' %tmeasure, fontsize=12, horizontalalignment='right')
+        axes[2,3].text(Xc[-1],0.25*config.hr,'$s=%.3g$' %s[ct],fontsize=12, horizontalalignment='right')
+
+        fig.tight_layout()
 
         plt.show()
         plt.pause(0.1)
