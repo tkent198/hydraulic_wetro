@@ -58,7 +58,7 @@ BC = config.BC
 ##################################################################
 outdir = config.outdir
 cwd = os.getcwd()
-dirn = str(cwd+outdir)
+dirn = str(cwd+'/configs'+outdir)
 try:
     os.makedirs(dirn)
 except OSError as exception:
