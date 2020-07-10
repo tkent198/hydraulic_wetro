@@ -117,6 +117,9 @@ index_fp = np.array(index_fp)[0]
 index_city = np.where((s >= LR1) & (s <= LR2))
 index_city = np.array(index_city)[0]
 
+fp = index_fp[60]
+ct = index_city[5]
+
 ## Initial conditions
 # using ic function specified in config
 U0, B, h0 = ic(s,Nk,config)
@@ -227,21 +230,30 @@ nxLc1 = int(np.floor(Lc1/Kk)) #river gridcell in which canal-1 water is added
 trand1_series = np.random.uniform(0,1,Nmeas)
 trand2_series = np.random.uniform(0,1,Nmeas)
 
-##################################################################
-# Numerical integration from t0 to tmax (forward Euler)
-##################################################################
 tunit = 0
 ncc = 0
 
 Rmfac = [] #Rain factor moor
 Rrfac = [] #Rain factor res
 Rtfac = [] #Rain factor total
-Qct = [] #discharge at city location
-hct = [] #water depth at city location
+Qct = U[1,ct+1] #discharge at city location
+hct = h[ct+1] #water depth at city location
 hc1 = [] #water depth canal-1
 hc2 = [] #water depth canal-2
 hc3 = [] #water depth canal-3
 h_res = [] #water depth Reservoir
+
+##Plotting limits:
+hmax = 0.03
+hmin = 0
+Qmax = 0.0004
+Qmin = 0
+hmmax = 0.12
+hmmin = 0
+
+##################################################################
+# Numerical integration from t0 to tmax (forward Euler)
+##################################################################
 
 while tn < tmax:
 
@@ -460,9 +472,6 @@ while tn < tmax:
 
     if tn > tmeasure:
 
-        fp = index_fp[60]
-        ct = index_city[5]
-
         U_array[:,:,index] = U
         h_array[:,:,index] = h
         Z_array[:,:,index] = h+B
@@ -479,9 +488,9 @@ while tn < tmax:
         fig, axes = plt.subplots(3, 4, figsize=(13,7))#, constrained_layout=True)
 
         ## Rainfall: times series
-        axes[0,0].plot(Rmfac,'gx')
-        axes[0,0].plot(Rrfac,'r+')
-        axes[0,0].plot(Rtfac,'o', mfc='none')
+        axes[0,0].plot(Rmfac, marker = '$M$', linestyle = 'None')
+        axes[0,0].plot(Rrfac, marker = '$R$', linestyle = 'None')
+        axes[0,0].plot(Rtfac, marker = '$&$', linestyle = 'None')
         axes[0,0].set_ylim(-0.5, 20)
         axes[0,0].set_yticks(rainfac)
         axes[0,0].set_yticklabels(rainfac)
@@ -505,36 +514,44 @@ while tn < tmax:
 
         ## Moor
         axes[1,0].plot(yy,hm)
+        axes[1,0].set_xlim([0,Ly])
+        axes[1,0].set_ylim([hmmin,hmmax])
 
         ## h-Q relationship in city (a la rating curve)
-        axes[2,0].plot(hct,Qct,'x')
-        axes[2,0].plot([hc,hc],[0,0.0006],'r:')
+        # if (hct[1:]>hct[:-1]):
+        #     axes[2,0].plot(hct,Qct,'2k')
+        # else:
+        #     axes[2,0].plot(hct,Qct,'1b')
+        axes[2,0].plot(hct[np.where(hct[1:]>hct[:-1])],Qct[np.where(hct[1:]>hct[:-1])],'2k')
+        axes[2,0].plot(hct[np.where(hct[1:]<=hct[:-1])],Qct[np.where(hct[1:]<=hct[:-1])],'1b')
+        axes[2,0].plot([hc,hc],[Qmin+0.0001,Qmax],'r:')
         axes[2,0].set_xlabel('h')
         axes[2,0].set_ylabel('Q')
-        axes[2,0].set_xlim([0,0.04])
-        axes[2,0].set_ylim([0,0.0006])
+        axes[2,0].set_xlim([hmin+0.01,hmax])
+        axes[2,0].set_ylim([Qmin+0.0001,Qmax])
         axes[2,0].ticklabel_format(axis="x", style="sci", scilimits=(0,0))
         axes[2,0].ticklabel_format(axis="y", style="sci", scilimits=(0,0))
 
         ## Canals and res: time series
-        axes[1,1].plot(hc1,'1')
-        axes[1,1].plot(hc2,'2')
-        axes[1,1].plot(hc3,'3')
-        axes[1,1].plot(h_res/10,'*')
+        axes[1,1].plot(hc1, marker = '$1$', linestyle = 'None')
+        axes[1,1].plot(hc2, marker = '$2$', linestyle = 'None')
+        axes[1,1].plot(hc3, marker = '$3$', linestyle = 'None')
+        axes[1,1].plot(h_res/10, marker = '$R$', linestyle = 'None')
+        axes[1,1].set_ylim([0.05,0.015])
 
         ## h(city) time series with flood threshold h_T
-        axes[2,1].plot([0,ncc-1],[hc, hc],'r--')
-        axes[2,1].plot(hct)
+        axes[2,1].plot([0,ncc-1],[hc, hc],'r:')
+        axes[2,1].plot(hct[1:])
         axes[2,1].set_ylim([0,0.04])
 
         ## h(s,t)
-        axes[0,2].plot([s[fp], s[fp]],[0,0.04],'r:')
-        axes[0,2].plot([s[ct], s[ct]],[0,0.04],'r:')
+        axes[0,2].plot([s[fp], s[fp]],[hmin,hmax],'r:')
+        axes[0,2].plot([s[ct], s[ct]],[hmin,hmax],'r:')
         axes[0,2].fill([config.LR1, config.LR2,config.LR2,config.LR1], [0,0,config.hc,config.hc],'r',alpha=0.1,linestyle='None')
-        axes[0,2].plot([s_r, s_r],[0,0.04],'k:')
-        axes[0,2].plot([s_m, s_m],[0,0.04],'k:')
-        axes[0,2].plot([Lc1, Lc1],[0,0.04],'k:')
-        axes[0,2].set_ylim([0,0.04])
+        axes[0,2].plot([s_r, s_r],[hmin,hmax],'k:')
+        axes[0,2].plot([s_m, s_m],[hmin,hmax],'k:')
+        axes[0,2].plot([Lc1, Lc1],[hmin,hmax],'k:')
+        axes[0,2].set_ylim([hmin,hmax])
         axes[0,2].set_xlim([0,L])
         axes[0,2].set_ylabel('$h(s,t)$',fontsize=12)
         axes[0,2].set_xlabel('$s$',fontsize=12)
@@ -542,11 +559,11 @@ while tn < tmax:
         axes[0,2].ticklabel_format(axis="y", style="sci", scilimits=(0,0))
 
         ## Au(s,t)
-        axes[1,2].set_ylim([0,0.0006])
+        axes[1,2].set_ylim([Qmin,Qmax])
         axes[1,2].set_xlim([0,L])
-        axes[1,2].plot([s_r, s_r],[0,0.04],'k:')
-        axes[1,2].plot([s_m, s_m],[0,0.04],'k:')
-        axes[1,2].plot([Lc1, Lc1],[0,0.04],'k:')
+        axes[1,2].plot([s_r, s_r],[Qmin,Qmax],'k:')
+        axes[1,2].plot([s_m, s_m],[Qmin,Qmax],'k:')
+        axes[1,2].plot([Lc1, Lc1],[Qmin,Qmax],'k:')
         axes[1,2].set_ylabel('$Au(s,t)$',fontsize=12)
         axes[1,2].set_xlabel('$s$',fontsize=12)
         axes[1,2].plot([s[:-1],s[1:]],[U[1,1:-1],U[1,1:-1]],'b', linewidth = 1.0)
@@ -566,7 +583,7 @@ while tn < tmax:
         axes[2,3].text(Xc[-1],0.5*config.hr,'$t=%.3g$' %tmeasure, fontsize=12, horizontalalignment='right')
         axes[2,3].text(Xc[-1],0.25*config.hr,'$s=%.3g$' %s[ct],fontsize=12, horizontalalignment='right')
 
-        fig.tight_layout()
+        plt.tight_layout(pad=0.2, w_pad=0.01, h_pad=0.01)
 
         plt.show()
         plt.pause(0.1)

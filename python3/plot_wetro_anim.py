@@ -23,7 +23,7 @@ from cross_sections import xsec_hAs, xsec_Ahs, plot_xsec_hAs
 # IMPORT PARAMETERS FROM CONFIGURATION FILE
 ##################################################################
 #spec = importlib.util.spec_from_file_location("config", sys.argv[1])
-spec = importlib.util.spec_from_file_location("config","configs/config#1.py")
+spec = importlib.util.spec_from_file_location("config","configs/config#2.py")
 config = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(config)
 
@@ -95,23 +95,6 @@ Nmeas = config.Nmeas
 dtmeasure = tmax/Nmeas
 tmeasure = dtmeasure
 timevec = np.linspace(tn,tmax,Nmeas+1)
-
-
-##################################################################
-# Define system arrays with ghost cells for BCs
-##################################################################
-
-# Arrays for integration
-Flux = np.empty([Neq,Nk+1])
-S = np.empty([Neq,Nk+2]) # for source terms (friction, bed slope, and rain)
-UU = np.empty([Neq,Nk+2])
-SL = np.empty(Nk+1)
-SR = np.empty(Nk+1) # numerical speeds
-VNC = np.empty([Neq,Nk+1]) # NCP integrals
-area = np.empty(Nk+2)
-Wp = np.empty(Nk+2)
-Rh = np.empty(Nk+2)
-dhdA = np.empty(Nk+2)
 
 print(' Loading simulation data from:', dirn)
 

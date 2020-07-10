@@ -24,7 +24,7 @@ from cross_sections import xsec_hAs, xsec_Ahs, plot_xsec_hAs
 # IMPORT PARAMETERS FROM CONFIGURATION FILE
 ##################################################################
 #spec = importlib.util.spec_from_file_location("config", sys.argv[1])
-spec = importlib.util.spec_from_file_location("config","configs/config#1.py")
+spec = importlib.util.spec_from_file_location("config","configs/config#2.py")
 config = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(config)
 
@@ -97,22 +97,6 @@ dtmeasure = tmax/Nmeas
 tmeasure = dtmeasure
 timevec = np.linspace(tn,tmax,Nmeas+1)
 
-##################################################################
-# Define system arrays with ghost cells for BCs
-##################################################################
-
-# Arrays for integration
-Flux = np.empty([Neq,Nk+1])
-S = np.empty([Neq,Nk+2]) # for source terms (friction, bed slope, and rain)
-UU = np.empty([Neq,Nk+2])
-SL = np.empty(Nk+1)
-SR = np.empty(Nk+1) # numerical speeds
-VNC = np.empty([Neq,Nk+1]) # NCP integrals
-area = np.empty(Nk+2)
-Wp = np.empty(Nk+2)
-Rh = np.empty(Nk+2)
-dhdA = np.empty(Nk+2)
-
 print(' Loading simulation data from:', dirn)
 
 U_array = np.load(str(dirn+'/U_array.npy'))
@@ -139,12 +123,12 @@ fig, axes = plt.subplots(2, 1, figsize=(10,6))
 axes[0].plot([s[fp], s[fp]],[0,0.04],'k:')
 axes[0].plot([s[ct], s[ct]],[0,0.04],'k:')
 axes[0].fill([config.LR1, config.LR2,config.LR2,config.LR1],[0,0,config.hc,config.hc],'r',alpha=0.1,linestyle='None')
-axes[0].set_ylim([0,0.04])
+axes[0].set_ylim([0,0.03])
 axes[0].set_xlim([0,L])
 axes[0].set_ylabel('$h(s,t)$',fontsize=14)
 # axes[0].set_xlabel('$s$',fontsize=14)
 
-axes[1].set_ylim([0,0.0006])
+axes[1].set_ylim([0,0.0004])
 axes[1].set_xlim([0,L])
 axes[1].set_ylabel('$Au(s,t)$',fontsize=14)
 axes[1].set_xlabel('$s$',fontsize=14)
