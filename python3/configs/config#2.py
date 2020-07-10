@@ -16,7 +16,7 @@ from init_cond import init_cond_wetro0
 ##########################################
 ## Output directory
 ##########################################
-outdir = '/configs/config#2'
+outdir = '/config#2'
 
 ##########################################
 ## General
