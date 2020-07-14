@@ -130,6 +130,12 @@ hcs = dat['hcanals']
 Ly = config.Ly
 yy = np.linspace(0, Ly, hm_array.shape[0]) # grid
 
+# # Check array shapes:
+# print('Rr shape: ', Rr.shape)
+# print('Rm shape: ', Rm.shape)
+# print('U_array shape: ', U_array.shape)
+# print('hcs shape: ', hcs.shape)
+# print('timevec: ', timevec.shape)
 # pdb.set_trace()
 
 ##################################################################
@@ -294,16 +300,16 @@ while tn <= tmax:
     ax_hxct = plt.subplot(G[2,3]) # X-sec: ct
 
     ## Rainfall: times series
-    ax_rt.plot(timevec[:T],Rm[:T], marker = '$M$', linestyle = 'None')
-    ax_rt.plot(timevec[:T],Rr[:T], marker = '$R$', linestyle = 'None')
-    ax_rt.plot(timevec[:T],Rm[:T]+Rr[:T], marker = '$&$', linestyle = 'None')
+    ax_rt.plot(timevec[:T+1],Rm[:T+1], marker = '$M$', linestyle = 'None')
+    ax_rt.plot(timevec[:T+1],Rr[:T+1], marker = '$R$', linestyle = 'None')
+    ax_rt.plot(timevec[:T+1],Rm[:T+1]+Rr[:T+1], marker = '$&$', linestyle = 'None')
     ax_rt.set_ylim(-0.5, 20)
     ax_rt.set_yticks(rainfac)
     ax_rt.set_yticklabels(rainfac)
     # axes[0,2].set_xlim(0, tmeasure)
 
     ## Rainfall: histogram
-    hist, bin_edges = np.histogram(Rm[:T]+Rr[:T], bins = np.arange(0,20,1), density=True)
+    hist, bin_edges = np.histogram(Rm[:T+1]+Rr[:T+1], bins = np.arange(0,20,1), density=True)
     # print('hist', hist)
     # print('bins', bin_edges)
     bin_edges = np.round(bin_edges,0)
@@ -327,8 +333,8 @@ while tn <= tmax:
     #     axes[2,0].plot(hct,Qct,'2k')
     # else:
     #     axes[2,0].plot(hct,Qct,'1b')
-    hct = h_array[0,ct+1,:T]
-    Qct = U_array[1,ct+1,:T]
+    hct = h_array[0,ct+1,:T+1]
+    Qct = U_array[1,ct+1,:T+1]
     ax_Qh.plot(hct[np.where(hct[1:]>hct[:-1])],Qct[np.where(hct[1:]>hct[:-1])],'2k')
     ax_Qh.plot(hct[np.where(hct[1:]<=hct[:-1])],Qct[np.where(hct[1:]<=hct[:-1])],'1b')
     ax_Qh.plot([hc,hc],[Qmin+0.0001,Qmax],'r:')
@@ -340,15 +346,15 @@ while tn <= tmax:
     ax_Qh.ticklabel_format(axis="y", style="sci", scilimits=(0,0))
 
     ## Canals and res: time series
-    ax_cr.plot(hcs[0,:T], marker = '$1$', linestyle = 'None')
-    ax_cr.plot(hcs[1,:T], marker = '$2$', linestyle = 'None')
-    ax_cr.plot(hcs[2,:T], marker = '$3$', linestyle = 'None')
-    ax_cr.plot(h_res[:T]/10, marker = '$R$', linestyle = 'None')
+    ax_cr.plot(timevec[:T+1],hcs[0,:T+1], marker = '$1$', linestyle = 'None')
+    ax_cr.plot(timevec[:T+1],hcs[1,:T+1], marker = '$2$', linestyle = 'None')
+    ax_cr.plot(timevec[:T+1],hcs[2,:T+1], marker = '$3$', linestyle = 'None')
+    ax_cr.plot(timevec[:T+1],h_res[:T+1]/10, marker = '$R$', linestyle = 'None')
     ax_cr.set_ylim([0.005,0.015])
 
     ## h(city) time series with flood threshold h_T
-    # ax_hct.plot([0,ncc-1],[hc, hc],'r:')
-    ax_hct.plot(hct)
+    ax_hct.plot([timevec[0], timevec[T]],[hc, hc],'r:')
+    ax_hct.plot(timevec[:T+1],hct)
     ax_hct.set_ylim([0,0.04])
 
     ## h(s,t)
@@ -380,14 +386,14 @@ while tn <= tmax:
     X,Y,Xc,Yc,__ = plot_xsec_hAs(U_array[0,fp+1,T],s[fp],config)
     ax_hxfp.plot(Xc,Yc,'k', linewidth=2.0)
     ax_hxfp.fill(X,Y,'b',alpha=0.2)
-    ax_hxfp.text(Xc[-1],0.5*config.hr,'$t=%.3g$' %tn, fontsize=12, horizontalalignment='right')
+    ax_hxfp.text(Xc[-1],0.5*config.hr,'$t=%.3g$' %timevec[T], fontsize=12, horizontalalignment='right')
     ax_hxfp.text(Xc[-1],0.25*config.hr,'$s=%.3g$' %s[fp],fontsize=12, horizontalalignment='right')
 
     ## h cross-section: city
     X,Y,Xc,Yc,__ = plot_xsec_hAs(U_array[0,ct+1,T],s[ct],config)
     ax_hxct.plot(Xc,Yc,'k', linewidth=2.0)
     ax_hxct.fill(X,Y,'b',alpha=0.2)
-    ax_hxct.text(Xc[-1],0.5*config.hr,'$t=%.3g$' %tn, fontsize=12, horizontalalignment='right')
+    ax_hxct.text(Xc[-1],0.5*config.hr,'$t=%.3g$' %timevec[T], fontsize=12, horizontalalignment='right')
     ax_hxct.text(Xc[-1],0.25*config.hr,'$s=%.3g$' %s[ct],fontsize=12, horizontalalignment='right')
 
     plt.tight_layout(pad=0.2, w_pad=0.01, h_pad=0.01)
