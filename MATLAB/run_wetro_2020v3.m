@@ -7,7 +7,7 @@
 % - RESERVOIR MODEL: now coupled to canal and river 
 % - CANALS: correct moor coupling (optional), res coupling (optional).
 
-% v3 builds on run_wetro_2020vr.m. Updates here:
+% v3 builds on run_wetro_2020v2.m. Updates here:
 
 % > clean up code: lots of redundant parts and repetition. DONE/ongoing.
 % > Advanced groundwater model (FEM) with connecting channel. PARTIALLY

@@ -10,6 +10,10 @@ Wetropolis v1. Numerical integration of fully-coupled components:
 -- moor (groundwater model PDE)
 '''
 
+
+SAVEDATA = 1 # 1 to save simulation data
+LOADRAIN = 1 # 1 to load saved rain in config__.npz; 0 to generate random rainfall
+
 ##################################################################
 # GENERIC MODULES REQUIRED
 ##################################################################
@@ -230,9 +234,17 @@ nxsr = int(np.floor(s_r/Kk)) # river gridcell in which res water is added
 nxsm = int(np.floor(s_m/Kk)) # river gridcell in which moor water is added
 nxLc1 = int(np.floor(Lc1/Kk)) #river gridcell in which canal-1 water is added
 
-# Random rainfall series in advance? see random_rainfall.py for some tests
-trand1_series = np.random.uniform(0,1,Nmeas)
-trand2_series = np.random.uniform(0,1,Nmeas)
+# # Random rainfall series in advance? see random_rainfall.py for some tests
+# trand1_series = np.random.uniform(0,1,Nmeas)
+# trand2_series = np.random.uniform(0,1,Nmeas)
+if (LOADRAIN == 1):
+
+    print(' Loading rainfall data from:', dirn)
+
+    dat = np.load(str(dirn+outdir+'.npz'))
+    Rr_load = dat['Rr']
+    Rm_load = dat['Rm']
+
 
 tunit = 0
 ncc = 0
@@ -270,50 +282,59 @@ while tn < tmax:
 
         ncc += 1
         tunit += wd
-        trand1 = np.random.uniform()
-        trand2 = np.random.uniform()
 
-        print('Generating rainfall... ')
-        ### "galton board 1": RAINFALL AMOUNT
-        if trand1 < 3/16:
-            nrain = 1 # Rain0
-        elif trand1 < 10/16:
-            nrain = 2 # 2*Rain0
-        elif trand1 < 15/16:
-            nrain = 4 # 4*Rain0
-        else:
-            nrain = 9 # 9*Rain0
+        if (LOADRAIN == 0):
 
-        ### "galton board 2": RAINFALL LOCATION
-        if trand2 < 3/16:
-            nloc = 1 # Reservoir
-            Rm = 0*Rain0*np.ones(Ny+1) #moor
-            Rr = nrain*Rain0*np.ones(Ny+1) #res
-            nt = nrain
-            print('Location: Reservoir only')
-        elif trand2 < 10/16:
-            nloc = 2 # Moor and reservoir
-            Rm = nrain*Rain0*np.ones(Ny+1) #moor
-            Rr = nrain*Rain0*np.ones(Ny+1) #res
-            nt = 2*nrain
-            print('Location: Moor and Reservoir')
-        elif trand2 < 15/16:
-            nloc = 3 # Moor
-            Rm = nrain*Rain0*np.ones(Ny+1) #moor
-            Rr = 0*Rain0*np.ones(Ny+1)#res
-            nt = nrain
-            print('Location: Moor only')
-        else:
-            nloc = 4 # No rain in catchment
-            Rm = 0*Rain0*np.ones(Ny+1) #moor
-            Rr = 0*Rain0*np.ones(Ny+1) #res
-            nt = 0
-            print('Location: none')
-        print('Total factor: ', nt)
+            print('Generating random rainfall... ')
 
-        Rmfac = np.append(Rmfac,Rm[0]/Rain0)
-        Rrfac = np.append(Rrfac,Rr[0]/Rain0)
-        Rtfac = np.append(Rtfac,nt)
+            trand1 = np.random.uniform()
+            trand2 = np.random.uniform()
+
+            ### "galton board 1": RAINFALL AMOUNT
+            if trand1 < 3/16:
+                nrain = 1 # Rain0
+            elif trand1 < 10/16:
+                nrain = 2 # 2*Rain0
+            elif trand1 < 15/16:
+                nrain = 4 # 4*Rain0
+            else:
+                nrain = 9 # 9*Rain0
+
+            ### "galton board 2": RAINFALL LOCATION
+            if trand2 < 3/16:
+                nloc = 1 # Reservoir
+                Rm = 0*Rain0*np.ones(Ny+1) #moor
+                Rr = nrain*Rain0*np.ones(Ny+1) #res
+                nt = nrain
+                print('Location: Reservoir only')
+            elif trand2 < 10/16:
+                nloc = 2 # Moor and reservoir
+                Rm = nrain*Rain0*np.ones(Ny+1) #moor
+                Rr = nrain*Rain0*np.ones(Ny+1) #res
+                nt = 2*nrain
+                print('Location: Moor and Reservoir')
+            elif trand2 < 15/16:
+                nloc = 3 # Moor
+                Rm = nrain*Rain0*np.ones(Ny+1) #moor
+                Rr = 0*Rain0*np.ones(Ny+1)#res
+                nt = nrain
+                print('Location: Moor only')
+            else:
+                nloc = 4 # No rain in catchment
+                Rm = 0*Rain0*np.ones(Ny+1) #moor
+                Rr = 0*Rain0*np.ones(Ny+1) #res
+                nt = 0
+                print('Location: none')
+            print('Total factor: ', nt)
+
+            Rmfac = np.append(Rmfac,Rm[0]/Rain0)
+            Rrfac = np.append(Rrfac,Rr[0]/Rain0)
+            Rtfac = np.append(Rtfac,nt)
+
+        elif (LOADRAIN == 1):
+
+            Rm = Rain0*Rm_load[ncc-1]*np.ones(Ny+1)
+            Rr = Rain0*Rr_load[ncc-1]*np.ones(Ny+1)
 
     ##################################################################
     # Time step: restrictions using wave speeds/velocities
@@ -499,14 +520,22 @@ print(' ')
 print('***** DONE: end of simulation at time:', tn)
 print(' ')
 
-print(' Saving simulation data in:', dirn)
+if (LOADRAIN == 1):
+    Rmfac = Rm_load
+    Rrfac = Rr_load
 
-np.savez(str(dirn+outdir), \
-U_array = U_array, \
-h_array = h_array, \
-Z_array = Z_array, \
-Rm = Rmfac,\
-Rr = Rrfac, \
-hcanals = np.vstack((hc1,hc2,hc3)), \
-h_res = h_res, \
-hm_array = hm_array)
+if (SAVEDATA == 1):
+
+    print('*** Saving simulation data in: ', dirn)
+
+    np.savez(str(dirn+outdir), \
+    U_array = U_array, \
+    h_array = h_array, \
+    Z_array = Z_array, \
+    Rm = Rmfac,\
+    Rr = Rrfac, \
+    hcanals = np.vstack((hc1,hc2,hc3)), \
+    h_res = h_res, \
+    hm_array = hm_array)
+else:
+    print('*** Simulation data NOT saved ***')
