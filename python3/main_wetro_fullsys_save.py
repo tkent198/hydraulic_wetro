@@ -11,8 +11,8 @@ Wetropolis v1. Numerical integration of fully-coupled components:
 '''
 
 
-SAVEDATA = 1 # 1 to save simulation data
-LOADRAIN = 1 # 1 to load saved rain in config__.npz; 0 to generate random rainfall
+SAVEDATA = 0 # 1 to save simulation data
+LOADRAIN = 0 # 1 to load saved rain in config__.npz; 0 to generate random rainfall
 
 ##################################################################
 # GENERIC MODULES REQUIRED
@@ -23,6 +23,7 @@ import os
 import errno
 import sys
 import pdb # Python DeBugging
+from datetime import datetime
 import importlib.util
 import matplotlib.pyplot as plt
 from matplotlib import animation
@@ -237,14 +238,16 @@ nxLc1 = int(np.floor(Lc1/Kk)) #river gridcell in which canal-1 water is added
 # # Random rainfall series in advance? see random_rainfall.py for some tests
 # trand1_series = np.random.uniform(0,1,Nmeas)
 # trand2_series = np.random.uniform(0,1,Nmeas)
-if (LOADRAIN == 1):
 
-    print(' Loading rainfall data from:', dirn)
+if (LOADRAIN == 1):
+    print(' Using rainfall data from:', dirn)
 
     dat = np.load(str(dirn+outdir+'.npz'))
     Rr_load = dat['Rr']
     Rm_load = dat['Rm']
 
+else:
+    print(' Generating random rainfall data day-by-day.')
 
 tunit = 0
 ncc = 0
@@ -277,9 +280,11 @@ while tn < tmax:
     # RANDOM RAINFALL
     ##################################################################
     while tn >= tunit:
+
         print(' ')
         print('tunit: ', tunit)
-
+        print(datetime.now())
+        
         ncc += 1
         tunit += wd
 
@@ -333,8 +338,12 @@ while tn < tmax:
 
         elif (LOADRAIN == 1):
 
+            print('Loaded rainfall data... ')
+            print(' ')
             Rm = Rain0*Rm_load[ncc-1]*np.ones(Ny+1)
             Rr = Rain0*Rr_load[ncc-1]*np.ones(Ny+1)
+            print('Moor rainfall factor:        Rm = ', Rm_load[ncc-1])
+            print('Reservoir rainfall factor:   Rr = ', Rr_load[ncc-1])
 
     ##################################################################
     # Time step: restrictions using wave speeds/velocities

@@ -1,5 +1,5 @@
 #######################################################################
-# Main run script for Wetropolis Au dynamics
+# Main run script for Wetropolis Au dynamics -- prelimanry simulation
 #######################################################################
 
 '''
@@ -202,14 +202,12 @@ while tn < tmax:
         # interior
         UU[:,1:-1] = U[:,1:-1] - dt*(Pp[:,1:] - Pm[:,:-1])/Kk + dt*S[:,1:-1]
         # ghosts
-        UU[0,0] = U[0,1] # A -- is this OK??
-        # UU(2,1) = U0(2,1)+0.00005*sin(tn/(4*pi)) % Au: sine wave
-        UU[1,0] = U0[1,0] + 0.0004*np.exp(-((tn-0.25*tmax)**2)/50) # Au: exp pulse
-        UU[:,-1] = UU[:,-2]
+        UU[0,0] = U0[0,1] # A -- is this OK??
+        UU[1,0] = U0[1,0] + 0.000*np.exp(-((tn-0.25*tmax)**2)/50) # Au: exp pulse
+        UU[:,-1] = UU[:,-2] # outflow at far end of domain
 
     # update arrays for A, Au and h
     U = UU
-
     #h ghosts
     h[0], __ = xsec_hAs(U[0,0],0.5*(-Kk+0),config)
     h[-1], __ = xsec_hAs(U[0,-1],0.5*(L+L+Kk),config)

@@ -19,6 +19,7 @@ import os
 import errno
 import sys
 import pdb # Python DeBugging
+from datetime import datetime
 import importlib.util
 import matplotlib.pyplot as plt
 from matplotlib import animation
@@ -265,9 +266,9 @@ while tn < tmax:
     # RANDOM RAINFALL
     ##################################################################
     while tn >= tunit:
-
+        print(' ')
         print('tunit: ', tunit)
-
+        print(datetime.now())
         ncc += 1
         tunit += wd
         trand1 = np.random.uniform()
@@ -491,108 +492,108 @@ while tn < tmax:
 
         # plt.ion() ## Note this correction
 
-        fig, axes = plt.subplots(3, 4, figsize=(13,7))#, constrained_layout=True)
-
-        ## Rainfall: times series
-        axes[0,0].plot(Rmfac, marker = '$M$', linestyle = 'None')
-        axes[0,0].plot(Rrfac, marker = '$R$', linestyle = 'None')
-        axes[0,0].plot(Rtfac, marker = '$&$', linestyle = 'None')
-        axes[0,0].set_ylim(-0.5, 20)
-        axes[0,0].set_yticks(rainfac)
-        axes[0,0].set_yticklabels(rainfac)
-        # axes[0,2].set_xlim(0, tmeasure)
-
-        ## Rainfall: histogram
-        hist, bin_edges = np.histogram(Rtfac, bins = np.arange(0,20,1), density=True)
-        # print('hist', hist)
-        # print('bins', bin_edges)
-        bin_edges = np.round(bin_edges,0)
-        axes[0,1].bar(bin_edges[:-1], hist, width = 1, color='#0504aa',alpha=0.7)
-        # plt.xlim(min(bin_edges), max(bin_edges))
-        axes[0,1].plot(rainfac,rainpdf,'ko')
-        axes[0,1].set_xlabel('Rainfall amount')
-        axes[0,1].set_ylabel('Density')
-        # axes[1,2].title('Histogram of rainfall amounts')
-        axes[0,1].set_xlim(-1, 19)
-        axes[0,1].set_xticks(rainfac)
-        axes[0,1].set_xticklabels(rainfac)
-
-
-        ## Moor
-        axes[1,0].plot(yy,hm)
-        axes[1,0].set_xlim([0,Ly])
-        axes[1,0].set_ylim([hmmin,hmmax])
-
-        ## h-Q relationship in city (a la rating curve)
-        # if (hct[1:]>hct[:-1]):
-        #     axes[2,0].plot(hct,Qct,'2k')
-        # else:
-        #     axes[2,0].plot(hct,Qct,'1b')
-        axes[2,0].plot(hct[np.where(hct[1:]>hct[:-1])],Qct[np.where(hct[1:]>hct[:-1])],'2k')
-        axes[2,0].plot(hct[np.where(hct[1:]<=hct[:-1])],Qct[np.where(hct[1:]<=hct[:-1])],'1b')
-        axes[2,0].plot([hc,hc],[Qmin+0.0001,Qmax],'r:')
-        axes[2,0].set_xlabel('h')
-        axes[2,0].set_ylabel('Q')
-        axes[2,0].set_xlim([hmin+0.01,hmax])
-        axes[2,0].set_ylim([Qmin+0.0001,Qmax])
-        axes[2,0].ticklabel_format(axis="x", style="sci", scilimits=(0,0))
-        axes[2,0].ticklabel_format(axis="y", style="sci", scilimits=(0,0))
-
-        ## Canals and res: time series
-        axes[1,1].plot(hc1, marker = '$1$', linestyle = 'None')
-        axes[1,1].plot(hc2, marker = '$2$', linestyle = 'None')
-        axes[1,1].plot(hc3, marker = '$3$', linestyle = 'None')
-        axes[1,1].plot(h_res/10, marker = '$R$', linestyle = 'None')
-        axes[1,1].set_ylim([0.005,0.015])
-
-        ## h(city) time series with flood threshold h_T
-        axes[2,1].plot([0,ncc-1],[hc, hc],'r:')
-        axes[2,1].plot(hct[1:])
-        axes[2,1].set_ylim([0,0.04])
-
-        ## h(s,t)
-        axes[0,2].plot([s[fp], s[fp]],[hmin,hmax],'r:')
-        axes[0,2].plot([s[ct], s[ct]],[hmin,hmax],'r:')
-        axes[0,2].fill([config.LR1, config.LR2,config.LR2,config.LR1], [0,0,config.hc,config.hc],'r',alpha=0.1,linestyle='None')
-        axes[0,2].plot([s_r, s_r],[hmin,hmax],'k:')
-        axes[0,2].plot([s_m, s_m],[hmin,hmax],'k:')
-        axes[0,2].plot([Lc1, Lc1],[hmin,hmax],'k:')
-        axes[0,2].set_ylim([hmin,hmax])
-        axes[0,2].set_xlim([0,L])
-        axes[0,2].set_ylabel('$h(s,t)$',fontsize=12)
-        axes[0,2].set_xlabel('$s$',fontsize=12)
-        axes[0,2].plot([s[:-1],s[1:]],[h[1:-1],h[1:-1]],'b', linewidth = 1.0)
-        axes[0,2].ticklabel_format(axis="y", style="sci", scilimits=(0,0))
-
-        ## Au(s,t)
-        axes[1,2].set_ylim([Qmin,Qmax])
-        axes[1,2].set_xlim([0,L])
-        axes[1,2].plot([s_r, s_r],[Qmin,Qmax],'k:')
-        axes[1,2].plot([s_m, s_m],[Qmin,Qmax],'k:')
-        axes[1,2].plot([Lc1, Lc1],[Qmin,Qmax],'k:')
-        axes[1,2].set_ylabel('$Au(s,t)$',fontsize=12)
-        axes[1,2].set_xlabel('$s$',fontsize=12)
-        axes[1,2].plot([s[:-1],s[1:]],[U[1,1:-1],U[1,1:-1]],'b', linewidth = 1.0)
-        axes[1,2].ticklabel_format(axis="y", style="sci", scilimits=(0,0))
-
-        ## h cross-section: floodplain
-        X,Y,Xc,Yc,__ = plot_xsec_hAs(U[0,fp+1],s[fp],config)
-        axes[2,2].plot(Xc,Yc,'k', linewidth=2.0)
-        axes[2,2].fill(X,Y,'b',alpha=0.2)
-        axes[2,2].text(Xc[-1],0.5*config.hr,'$t=%.3g$' %tmeasure, fontsize=12, horizontalalignment='right')
-        axes[2,2].text(Xc[-1],0.25*config.hr,'$s=%.3g$' %s[fp],fontsize=12, horizontalalignment='right')
-
-        ## h cross-section: city
-        X,Y,Xc,Yc,__ = plot_xsec_hAs(U[0,ct+1],s[ct],config)
-        axes[2,3].plot(Xc,Yc,'k', linewidth=2.0)
-        axes[2,3].fill(X,Y,'b',alpha=0.2)
-        axes[2,3].text(Xc[-1],0.5*config.hr,'$t=%.3g$' %tmeasure, fontsize=12, horizontalalignment='right')
-        axes[2,3].text(Xc[-1],0.25*config.hr,'$s=%.3g$' %s[ct],fontsize=12, horizontalalignment='right')
-
-        plt.tight_layout(pad=0.2, w_pad=0.01, h_pad=0.01)
-
-        plt.show()
-        plt.pause(0.1)
+        # fig, axes = plt.subplots(3, 4, figsize=(13,7))#, constrained_layout=True)
+        #
+        # ## Rainfall: times series
+        # axes[0,0].plot(Rmfac, marker = '$M$', linestyle = 'None')
+        # axes[0,0].plot(Rrfac, marker = '$R$', linestyle = 'None')
+        # axes[0,0].plot(Rtfac, marker = '$&$', linestyle = 'None')
+        # axes[0,0].set_ylim(-0.5, 20)
+        # axes[0,0].set_yticks(rainfac)
+        # axes[0,0].set_yticklabels(rainfac)
+        # # axes[0,2].set_xlim(0, tmeasure)
+        #
+        # ## Rainfall: histogram
+        # hist, bin_edges = np.histogram(Rtfac, bins = np.arange(0,20,1), density=True)
+        # # print('hist', hist)
+        # # print('bins', bin_edges)
+        # bin_edges = np.round(bin_edges,0)
+        # axes[0,1].bar(bin_edges[:-1], hist, width = 1, color='#0504aa',alpha=0.7)
+        # # plt.xlim(min(bin_edges), max(bin_edges))
+        # axes[0,1].plot(rainfac,rainpdf,'ko')
+        # axes[0,1].set_xlabel('Rainfall amount')
+        # axes[0,1].set_ylabel('Density')
+        # # axes[1,2].title('Histogram of rainfall amounts')
+        # axes[0,1].set_xlim(-1, 19)
+        # axes[0,1].set_xticks(rainfac)
+        # axes[0,1].set_xticklabels(rainfac)
+        #
+        #
+        # ## Moor
+        # axes[1,0].plot(yy,hm)
+        # axes[1,0].set_xlim([0,Ly])
+        # axes[1,0].set_ylim([hmmin,hmmax])
+        #
+        # ## h-Q relationship in city (a la rating curve)
+        # # if (hct[1:]>hct[:-1]):
+        # #     axes[2,0].plot(hct,Qct,'2k')
+        # # else:
+        # #     axes[2,0].plot(hct,Qct,'1b')
+        # axes[2,0].plot(hct[np.where(hct[1:]>hct[:-1])],Qct[np.where(hct[1:]>hct[:-1])],'2k')
+        # axes[2,0].plot(hct[np.where(hct[1:]<=hct[:-1])],Qct[np.where(hct[1:]<=hct[:-1])],'1b')
+        # axes[2,0].plot([hc,hc],[Qmin+0.0001,Qmax],'r:')
+        # axes[2,0].set_xlabel('h')
+        # axes[2,0].set_ylabel('Q')
+        # axes[2,0].set_xlim([hmin+0.01,hmax])
+        # axes[2,0].set_ylim([Qmin+0.0001,Qmax])
+        # axes[2,0].ticklabel_format(axis="x", style="sci", scilimits=(0,0))
+        # axes[2,0].ticklabel_format(axis="y", style="sci", scilimits=(0,0))
+        #
+        # ## Canals and res: time series
+        # axes[1,1].plot(hc1, marker = '$1$', linestyle = 'None')
+        # axes[1,1].plot(hc2, marker = '$2$', linestyle = 'None')
+        # axes[1,1].plot(hc3, marker = '$3$', linestyle = 'None')
+        # axes[1,1].plot(h_res/10, marker = '$R$', linestyle = 'None')
+        # axes[1,1].set_ylim([0.005,0.015])
+        #
+        # ## h(city) time series with flood threshold h_T
+        # axes[2,1].plot([0,ncc-1],[hc, hc],'r:')
+        # axes[2,1].plot(hct[1:])
+        # axes[2,1].set_ylim([0,0.04])
+        #
+        # ## h(s,t)
+        # axes[0,2].plot([s[fp], s[fp]],[hmin,hmax],'r:')
+        # axes[0,2].plot([s[ct], s[ct]],[hmin,hmax],'r:')
+        # axes[0,2].fill([config.LR1, config.LR2,config.LR2,config.LR1], [0,0,config.hc,config.hc],'r',alpha=0.1,linestyle='None')
+        # axes[0,2].plot([s_r, s_r],[hmin,hmax],'k:')
+        # axes[0,2].plot([s_m, s_m],[hmin,hmax],'k:')
+        # axes[0,2].plot([Lc1, Lc1],[hmin,hmax],'k:')
+        # axes[0,2].set_ylim([hmin,hmax])
+        # axes[0,2].set_xlim([0,L])
+        # axes[0,2].set_ylabel('$h(s,t)$',fontsize=12)
+        # axes[0,2].set_xlabel('$s$',fontsize=12)
+        # axes[0,2].plot([s[:-1],s[1:]],[h[1:-1],h[1:-1]],'b', linewidth = 1.0)
+        # axes[0,2].ticklabel_format(axis="y", style="sci", scilimits=(0,0))
+        #
+        # ## Au(s,t)
+        # axes[1,2].set_ylim([Qmin,Qmax])
+        # axes[1,2].set_xlim([0,L])
+        # axes[1,2].plot([s_r, s_r],[Qmin,Qmax],'k:')
+        # axes[1,2].plot([s_m, s_m],[Qmin,Qmax],'k:')
+        # axes[1,2].plot([Lc1, Lc1],[Qmin,Qmax],'k:')
+        # axes[1,2].set_ylabel('$Au(s,t)$',fontsize=12)
+        # axes[1,2].set_xlabel('$s$',fontsize=12)
+        # axes[1,2].plot([s[:-1],s[1:]],[U[1,1:-1],U[1,1:-1]],'b', linewidth = 1.0)
+        # axes[1,2].ticklabel_format(axis="y", style="sci", scilimits=(0,0))
+        #
+        # ## h cross-section: floodplain
+        # X,Y,Xc,Yc,__ = plot_xsec_hAs(U[0,fp+1],s[fp],config)
+        # axes[2,2].plot(Xc,Yc,'k', linewidth=2.0)
+        # axes[2,2].fill(X,Y,'b',alpha=0.2)
+        # axes[2,2].text(Xc[-1],0.5*config.hr,'$t=%.3g$' %tmeasure, fontsize=12, horizontalalignment='right')
+        # axes[2,2].text(Xc[-1],0.25*config.hr,'$s=%.3g$' %s[fp],fontsize=12, horizontalalignment='right')
+        #
+        # ## h cross-section: city
+        # X,Y,Xc,Yc,__ = plot_xsec_hAs(U[0,ct+1],s[ct],config)
+        # axes[2,3].plot(Xc,Yc,'k', linewidth=2.0)
+        # axes[2,3].fill(X,Y,'b',alpha=0.2)
+        # axes[2,3].text(Xc[-1],0.5*config.hr,'$t=%.3g$' %tmeasure, fontsize=12, horizontalalignment='right')
+        # axes[2,3].text(Xc[-1],0.25*config.hr,'$s=%.3g$' %s[ct],fontsize=12, horizontalalignment='right')
+        #
+        # plt.tight_layout(pad=0.2, w_pad=0.01, h_pad=0.01)
+        #
+        # plt.show()
+        # plt.pause(0.1)
 
         index += 1
         tmeasure += dtmeasure
