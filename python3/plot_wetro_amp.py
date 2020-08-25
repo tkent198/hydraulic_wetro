@@ -24,7 +24,7 @@ from cross_sections import xsec_hAs, xsec_Ahs, plot_xsec_hAs
 # IMPORT PARAMETERS FROM CONFIGURATION FILE
 ##################################################################
 #spec = importlib.util.spec_from_file_location("config", sys.argv[1])
-spec = importlib.util.spec_from_file_location("config","configs/config#2.py")
+spec = importlib.util.spec_from_file_location("config","configs/config#1.py")
 config = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(config)
 
@@ -58,7 +58,7 @@ BC = config.BC
 ##################################################################
 outdir = config.outdir
 cwd = os.getcwd()
-dirn = str(cwd+'/configs'+outdir)
+dirn = str(cwd+outdir)
 try:
     os.makedirs(dirn)
 except OSError as exception:
