@@ -24,7 +24,7 @@ This repository contains the source code and documentation on the numerical mode
 Urban flooding is a major hazard worldwide, brought about by intense rainfall and often exacerbated by the built environment. The tabletop flood-demonstrator Wetropolis illustrates in an idealised modelling environment how extreme hydro-climatic events can cause flooding of a city due to peaks in river levels and groundwater following intense rainfall. It aims to conceptualise the science of flooding in a way that is accessible to and directly engages the public and also provides a scientific testbed for flood modelling, control and mitigation, and data assimilation. As such, it is useful to the scientist, industrial practitioner, and general public.
 
 ### A brief description of Wetropolis
-Physically, it comprises a winding river channel with parallel canal, a reservoir for water storage, a porous flow cell (analogous to a moor) with observable groundwater flow, and random rainfall, which may or may not lead to flooding in the idealised urban area of Wetropolis. The main river channel has three π-degree bends and one (π/4)-degree bend and is fed by water flowing into the domain at an upstream entry and leaving the domain at the downstream exit. The river bed is sloping down (uniformly with gradient 1 in 100); the river cross-sectional area is rectangular and uniform, and flanked on one side by a sloping flood plain outside of the urban area. Through the urban area, the rectangular channel is flanked on both sides by flat rectangular plains of higher elevation than the regular river channel, i.e., the cross-sectional area is T-shaped. Water enters the main channel in three places: (i) the upstream inflow, generally kept constant; (ii) overflow of a groundwater cell (or "moor") with porous material and fed by random daily rainfall; and (iii) overflow from a reservoir, also fed by random daily rainfall. The two overflows can be placed in three different spots along the river: upstream, midstream or downstream just before the city plain. The set-up is displayed in plan-view (below left) and in action at Confluence 2018, Leeds (below right).
+Physically, it comprises a winding river channel with parallel canal, a reservoir for water storage, a porous flow cell (analogous to a moor) with observable groundwater flow, and random rainfall, which may or may not lead to flooding in the idealised urban area of Wetropolis. The main river channel has three π-degree bends and one (π/2)-degree bend and is fed by water flowing into the domain at an upstream entry and leaving the domain at the downstream exit. The river bed is sloping down (uniformly with gradient 1 in 100). The river cross-sectional area is rectangular and uniform below a certain threshold height; outside of the urban area and above this threshold, it is flanked on one side by a sloping flood plain. Through the urban area, the rectangular channel is flanked on both sides by flat rectangular plains of higher elevation than the regular river channel, i.e., the cross-sectional area is T-shaped. Water enters the main channel in three places: (i) the upstream inflow, generally kept constant; (ii) overflow of a groundwater cell (or "moor") with porous material and fed by random daily rainfall; and (iii) overflow from a reservoir, also fed by random daily rainfall. The two overflows can be placed in three different spots along the river: upstream, midstream or downstream just before the city plain. The set-up is displayed in plan-view (below left) and in action at Confluence 2018, Leeds (below right).
 
 Plan view            |  In action
 :-------------------------:|:-------------------------:
@@ -103,7 +103,7 @@ File/dir name                   |  Summary
 ### Wetropolis: entire system v1
 
 #### Summary
-First simulations of the St. Venant system for the river dynamics coupled to the other components of Wetropolis (see plan view above). Rainfall is supplied each wd at a random location (reservoir, moor, both, or nowhere) and rate (loosely-speaking 1, 2, 4, or 9s per wd). Separate reservoir and moor groundwater models describe the water level in these locations.The reservoir has an outflow directly into the river channel at s = s_res = 0.932m, and the moor has an outflow into the river channel and the canal at s = s_m = 2.038m *[see note below]* . The canal runs parallel to the river channel and has 3 sections connected by weirs (locks) and the water level in each section is constant in space. The final canal section flows into the river channel in the city region (s = s_c1 = 3.858m). Flooding occurs in the city region when the river levels exceed 0.02m. Initially, the moor, reservoir, and canal sections are dry, the river channel has constant depth with prescribed constant inflow at s=0.
+First simulations of the St. Venant system for the river dynamics coupled to the other components of Wetropolis (see plan view above). Rainfall is supplied each wd at a random location (reservoir, moor, both, or nowhere) and amount (1, 2, 4, or 9s per wd). Separate reservoir and moor groundwater models describe the water level in these locations.The reservoir has an outflow directly into the river channel at s = s_res = 0.932m, and the moor has an outflow into the river channel and the canal at s = s_m = 2.038m *[see note below]* . The canal runs parallel to the river channel and has 3 sections connected by weirs (locks) and the water level in each section is constant in space. The final canal section flows into the river channel in the city region (s = s_c1 = 3.858m). Flooding occurs in the city region when the river levels exceed 0.02m. Initially, the moor, reservoir, and canal sections are dry, the river channel has constant depth with prescribed constant inflow at s=0.
 
 #### Plots
 <div align="center"> <bf>The Wetropolis 'live' dashboard </bf> </div>
@@ -111,13 +111,13 @@ First simulations of the St. Venant system for the river dynamics coupled to the
 ![live_panel](MATLAB/mov/wetro2_Nk_100_Tend_1000.gif)
 
 Panel description: from top left to bottom right.
-* Rainfall amount (rate), as a function of time, in the reservoir (blue), moor (cyan), and both (res+moor; red). Possible amounts are (0,1,2,4,8,9,18) with probabilities given in the pdf.
+* Rainfall amount (rate), as a function of time, in the reservoir (blue), moor (cyan), and both (res+moor; red). Possible amounts are (0,1,2,4,8,9,18)r_0 where r_0 is a unit rainfall rate with probabilities given in the pdf (see Bokhove et al. 2020 for more details).
 * Sample pdf of daily rainfall (time-dependent bars). The theoretical pdf is denoted by the black markers.
 * River flow Au(s,t) along the channel s. The three vertical dotted lines correspond to the reservoir, moor, and canal inflows at s = 0.932m, 2.038m, and 3.858m, respectively. Note the jumps after the inflows.
 * The water level h_m in the moor, as a function spatial moor coordinate y and time t, determined by a groundwater (nonlinear diffusion) model. The time-dependent left boundary is coupled to the river and canal.  Right boundary: solid wall. Rainfall is spatially uniform.
 * Canal and reservoir levels as a function of time. Note the spin-up from dry conditions of about 200s (20 wd).
-* Water depth h(s,t) along the channel s. The three vertical dotted lines correspond to the reservoir, moor, and canal inflows at s = 0.932m, 2.038m, and 3.858m, respectively. The red shaded are denotes the city region.
-* Stage-discharge (h-Q) relationship in the city region. Empirical data to fit a rating curve?
+* Water depth h(s,t) along the channel s. The three vertical dotted lines correspond to the reservoir, moor, and canal inflows at s = 0.932m, 2.038m, and 3.858m, respectively. The red shaded area denotes the city region.
+* Stage-discharge (h-Q) relationship in the city region. Idea: use as empirical data to fit a standard rating curve?
 * River level time series (black) in the city region downstream of the canal inflow. The blue line is the constant inflow at s=0. The threshold for flooding is 0.02m (red dotted line).
 * Cross-channel snapshots of river levels just downstream of the moor inflow (floodplain).
 * Cross-channel snapshots of river levels just downstream of the canal inflow (city).
@@ -125,7 +125,7 @@ Panel description: from top left to bottom right.
 Simulation details: ```run_wetro_2020v2.m```. Video saved as ```MATLAB/mov/wetro2_Nk=100_Tend=1000.avi```. Number of elements Nk = 100 implies a grid-size of 4.21cm.
 
 
-***Note:*** moor and reservoir coupling in the code is actually inconsistent with physical set-up. In the above simulations: the reservoir is coupled to the river channel only at s=0.932m; the moor is coupled to the river channel at s = 2.038m and canal at s = 0.932m (mathematically/numerically this is allowed, but makes little sense in reality -- unless a pipe carries partial outflow instantaneously from the moor to the reservoir location!). Note also that the actual Wetropolis river channel has length L=5.2m.
+***Note:*** moor and reservoir coupling in the code is actually inconsistent with physical set-up. In the above simulations: the reservoir is coupled to the river channel only at s=0.932m; the moor is coupled to the river channel at s = 2.038m and canal at s = 0.932m (mathematically/numerically this is allowed, but makes little sense in reality -- unless a pipe carries partial outflow instantaneously from the moor to the reservoir location!). Note also that the actual Wetropolis river channel has length L=5.2m. This has been made consistent with reality in what follows below!
 
 #### Other comments
 * On a basic flood control experiment: constrain river depth to be less than hT = 0.02m in city by, e.g., temporarily turning off reservoir outflow (i.e., raise the weir height from 0.1m so reservoir acts as storage buffer during high rainfall, then lower weir height as rainfall lessens). This could be implemented in a straightforward but crude way as follows.
@@ -138,7 +138,9 @@ else
 end
  ```
 NOTE: as a first check to see if the reservoir has enough storage capacity to buffer the flood peak, set Qres(t) = 0 for all t  -- the "infinite reservoir".
-* EnKF for river dynamics and parameter estimation (see, e.g., Liz Cooper's recent work). In practice many parameters are poorly understood (Manning coeff, inflow rate, portion of outflow to canal/river etc.).
+* EnKF for river dynamics and parameter estimation (see, e.g., Cooper et al, 2019). In practice many parameters are poorly understood (Manning coefficient, inflow rate, portion of outflow to canal/river etc.).
+
+*Cooper, E., Dance, S., Garcia-Pintado, J., Nichols, N., and Smith, P.: Observation impact, domain length and parameter estimation in data assimilation for flood forecasting, Environ. Modell. Softw., 104, 199–214.*
 
 ### Wetropolis: entire system v2
 
@@ -146,7 +148,7 @@ NOTE: as a first check to see if the reservoir has enough storage capacity to bu
 As above but with the following developments:
 * The inconsistencies with the physical set-up are addressed. The reservoir flows partially into the canal and partially into the river channel at s_res; the moor flows into the river channel only at s_m. Length of domain is 5.2m and city region is slightly extended.
 * Groundwater coupling: two implementations. (i) directly to river channel (so that left boundary depth of moor is the same as river depth at that location); (ii) to river channel via a connecting canal (more realistic). Groundwater model: (i) FD or (ii) FEM model. See material in ```groundwater```  folder for more info on FEM and the connecting canal.
-* Initially, canal water levels are that same as their respective weir heights; reservoir is empty. So, canal water levels are steady until the reservoir fills up to its weir height Pwr = 0.1.
+* Initially, canal water levels are the same as their respective weir heights; reservoir is empty. So, canal water levels are steady until the reservoir fills up to its weir height Pwr = 0.1.
 
 #### Plots
 
