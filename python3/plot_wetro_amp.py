@@ -128,7 +128,7 @@ axes[0].set_xlim([0,L])
 axes[0].set_ylabel('$h(s,t)$',fontsize=14)
 # axes[0].set_xlabel('$s$',fontsize=14)
 
-axes[1].set_ylim([0,0.0004])
+axes[1].set_ylim([0,0.0006])
 axes[1].set_xlim([0,L])
 axes[1].set_ylabel('$Au(s,t)$',fontsize=14)
 axes[1].set_xlabel('$s$',fontsize=14)

@@ -51,6 +51,7 @@ dbds = config.dbds
 g = config.g
 Cm = config.Cm
 Neq = config.Neq
+eta = config.eta
 ic = config.ic
 cfl = config.cfl
 BC = config.BC
@@ -142,7 +143,8 @@ Z_array[:,:,0] = Z0
 ##################################################################
 # Numerical integration from t0 to tmax
 ##################################################################
-
+print(' ')
+print('Start numerical integration from time ', tn, ' to time ', tmax)
 while tn < tmax:
 
     # numerical fluxes
@@ -202,8 +204,9 @@ while tn < tmax:
         # interior
         UU[:,1:-1] = U[:,1:-1] - dt*(Pp[:,1:] - Pm[:,:-1])/Kk + dt*S[:,1:-1]
         # ghosts
-        UU[0,0] = U0[0,1] # A -- is this OK??
-        UU[1,0] = U0[1,0] + 0.000*np.exp(-((tn-0.25*tmax)**2)/50) # Au: exp pulse
+        UU[0,0] = U[0,1] # A -- is this OK??
+        # UU[1,0] = U0[1,0] + 0.0004*np.exp(-((tn-0.25*tmax)**2)/50) # Au: exp pulse
+        UU[1,0] = U0[1,0] + eta*np.exp(-((tn-0.25*tmax)**2)/50) # Au: steady flow
         UU[:,-1] = UU[:,-2] # outflow at far end of domain
 
     # update arrays for A, Au and h
@@ -216,6 +219,10 @@ while tn < tmax:
         h[j], __ = xsec_hAs(U[0,j],0.5*(s[j-1]+s[j]),config)
 
     if tn > tmeasure:
+
+        print(' ')
+        print('***** Saving data at time:', tmeasure)
+        print('Integrating...')
 
         U_array[:,:,index] = U
         h_array[:,:,index] = h
