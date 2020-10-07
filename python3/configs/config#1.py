@@ -2,6 +2,11 @@
 # Config file: parameters for Wetropolis Au dynamics
 #######################################################################
 
+'''
+config#1: flood wave test.
+Initialise with kinematic velocity and inflow and send through a Gaussian pulse.
+'''
+
 import numpy as np
 from init_cond import init_cond_wetro0
 
@@ -28,7 +33,7 @@ s_m = 2.038 #moor influx loc
 
 LR11 = 3.4 # transition zone from fp to c [LR11, LR1]
 LR22 = 3.8 # transition zone from c to fp [LR2, LR22]
-tr = 50 # severity of transition 
+tr = 50 # severity of transition
 
 dbds = -0.01 # mean slope river bed
 
@@ -37,13 +42,14 @@ g = 9.81     # acceleration of gravity
 Cm = 0.02    # Manning coefficient
 cfl = 0.5 # CFL number for stable time-stepping
 Neq = 2 # U = (A, Au)
+eta = 0.0004
 
 # INITIAL and BOUNDARY CONDITIONS
 # Periodic BC = 1
 # Neumann BC = 2
 # specified inflow BC = 3
-ic = init_cond_wetro0 
-BC = 3 
+ic = init_cond_wetro0
+BC = 3
 
 # time
 tn = 0
@@ -52,7 +58,7 @@ tmax = 100
 Nmeas = 100
 
 
-## From WetropA1d.m: 
+## From WetropA1d.m:
 # Spatial set-up of Wetropolis channel: length LR3 = circa 5m
 # chan.L1 = 0.780;
 # chan.r2 = 0.125;

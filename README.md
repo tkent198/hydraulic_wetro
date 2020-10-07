@@ -95,11 +95,14 @@ File/dir name                   |  Summary
 ```plot_wetro.py```             | Plotting routine for data generated in main scripts
 ```random_rainfall.py```     | Test script for generating and plotting random rainfall
 ```/configs```                  | Dir for config files:
-```/configs/config#1.py``` etc. | Parameters for test case
+```/configs/config#0.py``` etc. | Parameters for steady state test case
+```/configs/config#1.py``` etc. | Parameters for flood wave test case
 ```/configs/config#2.py``` etc. | Parameters for full system v1
 
 
 ## Preliminary simulations
+
+
 ### Wetropolis: entire system v1
 
 #### Summary
