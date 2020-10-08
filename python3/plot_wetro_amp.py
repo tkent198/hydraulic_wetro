@@ -1,6 +1,16 @@
 #######################################################################
-# Main plotting script for Wetropolis Au dynamics
+# Plotting script for Wetropolis Au dynamics - test cases
 #######################################################################
+
+'''
+Plots simulation data from main_wetro_tests.py
+
+Specify in spec below:
+> config#0 for steady state test
+> config#1 for floodwave test
+
+Output: interactive video of simulations.
+'''
 
 ##################################################################
 # GENERIC MODULES REQUIRED

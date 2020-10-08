@@ -1,6 +1,16 @@
 #######################################################################
-# Main plotting script for Wetropolis Au dynamics
+# Plotting script for Wetropolis Au dynamics - test cases
 #######################################################################
+
+'''
+Plots simulation data from main_wetro_tests.py
+
+Specify in spec below:
+> config#0 for steady state test
+> config#1 for floodwave test
+
+Output: video loops through time, but no interaction. See plot_wetro_amp.py.
+'''
 
 ##################################################################
 # GENERIC MODULES REQUIRED
@@ -23,7 +33,7 @@ from cross_sections import xsec_hAs, xsec_Ahs, plot_xsec_hAs
 # IMPORT PARAMETERS FROM CONFIGURATION FILE
 ##################################################################
 #spec = importlib.util.spec_from_file_location("config", sys.argv[1])
-spec = importlib.util.spec_from_file_location("config","configs/config#2.py")
+spec = importlib.util.spec_from_file_location("config","configs/config#1.py")
 config = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(config)
 
