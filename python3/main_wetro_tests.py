@@ -26,7 +26,7 @@ from cross_sections import xsec_hAs, xsec_Ahs
 # IMPORT PARAMETERS FROM CONFIGURATION FILE
 ##################################################################
 #spec = importlib.util.spec_from_file_location("config", sys.argv[1])
-spec = importlib.util.spec_from_file_location("config","configs/config#1.py")
+spec = importlib.util.spec_from_file_location("config","configs/config#0.py")
 config = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(config)
 
@@ -150,6 +150,9 @@ while tn < tmax:
     # numerical fluxes
     for j in range(0,Nk+1):
         Flux[:,j], SL[j], SR[j], VNC[:,j] = NCPflux_Au(U[:,j],U[:,j+1],s[j],config)
+
+    # # Check wave speed signs for steady state proof
+    # print('SL = ', SL[3], '; SR = ', SR[3])
 
     #Determine hydraulic radius, h and dh/dA etc
     #ghosts
