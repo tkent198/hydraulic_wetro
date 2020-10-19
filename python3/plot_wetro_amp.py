@@ -34,7 +34,7 @@ from cross_sections import xsec_hAs, xsec_Ahs, plot_xsec_hAs
 # IMPORT PARAMETERS FROM CONFIGURATION FILE
 ##################################################################
 #spec = importlib.util.spec_from_file_location("config", sys.argv[1])
-spec = importlib.util.spec_from_file_location("config","configs/config#1.py")
+spec = importlib.util.spec_from_file_location("config","configs/config#0.py")
 config = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(config)
 

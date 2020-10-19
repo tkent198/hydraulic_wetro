@@ -11,8 +11,8 @@ Wetropolis v1. Numerical integration of fully-coupled components:
 '''
 
 
-SAVEDATA = 0 # 1 to save simulation data
-LOADRAIN = 0 # 1 to load saved rain in config__.npz; 0 to generate random rainfall
+SAVEDATA = 1 # 1 to save simulation data
+LOADRAIN = 1 # 1 to load saved rain in config__.npz; 0 to generate random rainfall
 
 ##################################################################
 # GENERIC MODULES REQUIRED
@@ -284,7 +284,7 @@ while tn < tmax:
         print(' ')
         print('tunit: ', tunit)
         print(datetime.now())
-        
+
         ncc += 1
         tunit += wd
 
