@@ -2,6 +2,7 @@
 
 ![Wetro py3 dashboard](configs/config#2/t990.png)
 
+
 <!--
 ---
 ## Contents
@@ -52,4 +53,4 @@ File/dir name                   |  Summary
 
 ### Full system
 
-...
+![Wetro py3 dashboard](configs/config#2/t990.png)
