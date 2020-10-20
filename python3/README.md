@@ -1,6 +1,6 @@
 # hydraulic_wetro: python3 code
 
-![Wetro py3 dashboard](configs/config#2/t990.png)
+<!-- ![Wetro py3 dashboard](configs/config#2/t990.png) -->
 
 
 <!--
