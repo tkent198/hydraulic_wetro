@@ -1,6 +1,6 @@
 
 import numpy as np
-from cross_sections import xsec_hAs, xsec_Ahs
+from cross_sections_local import xsec_hAs, xsec_Ahs
 
 def NCPflux_Au(UL,UR,s,config):
 
@@ -28,9 +28,12 @@ def NCPflux_Au(UL,UR,s,config):
     # associated numerical speeeds, and NCP integral term VNC
     '''
 
-#    Nk = len(s)-1
-#    Kk = config.LR3/Nk
-    Kk = 0.04
+    # unpack config pars needed
+    g = config.g
+    L = config.LR3
+    Nk = config.Nk
+    Kk = L/Nk
+    # Kk = 0.04
 
     # work with (A,u) rather than (A,Au)
     AL = UL[0]
@@ -50,8 +53,8 @@ def NCPflux_Au(UL,UR,s,config):
     hR, dhdAR = xsec_hAs(AR,s+Kk,config)
 
     # compute left and right wave speeds from eigenvalues
-    SL = min(uL - np.sqrt(config.g*AL*dhdAL), uR - np.sqrt(config.g*AR*dhdAR))
-    SR = max(uL + np.sqrt(config.g*AL*dhdAL), uR + np.sqrt(config.g*AR*dhdAR))
+    SL = min(uL - np.sqrt(g*AL*dhdAL), uR - np.sqrt(g*AR*dhdAR))
+    SR = max(uL + np.sqrt(g*AL*dhdAL), uR + np.sqrt(g*AR*dhdAR))
 
     # compute h = h(A,s) Gauss integral
     # 2-point
@@ -61,9 +64,9 @@ def NCPflux_Au(UL,UR,s,config):
     h1, __ = xsec_hAs(AL + zetami*(AR-AL),s,config)
     h2, __ = xsec_hAs(AL + zetapl*(AR-AL),s,config)
 
-    VNC2 = -0.5*config.g*(AR-AL)*(h1+h2)
+    VNC2 = -0.5*g*(AR-AL)*(h1+h2)
 
-    # 3-point
+    ## 3-point
     # zetapl = 0.5*(1+np.sqrt(3/5))
     # zetami = 0.5*(1-np.sqrt(3/5))
     #
@@ -74,7 +77,7 @@ def NCPflux_Au(UL,UR,s,config):
     # VNC2 = -0.5*config.g*(AR-AL)*((5/9)*h1 + (5/9)*h2 + (8/9)*h0)
 
 
-    # 7-point
+    ## 7-point
     # zeta=[-0.9491079123, -0.7415311855, -0.4058451513, 0.0, 0.4058451513, 0.7415311855, 0.9491079123];
     # # Weighting coefficients
     # w=[0.1294849661, 0.2797053914, 0.3818300505, 0.4179591836, 0.3818300505, 0.2797053914, 0.1294849661];
@@ -84,7 +87,6 @@ def NCPflux_Au(UL,UR,s,config):
     # for i in range(0,7):
     #     h[i]= xsec_hAs(AL + 0.5*(1+zeta[i])*(AR-AL),s,config)
     #
-    #
     # VNC2 = -0.5*config.g*(AR-AL)*np.sum(w*h)
 
     VNC1 = 0
@@ -92,14 +94,14 @@ def NCPflux_Au(UL,UR,s,config):
 
     # define flux depending on wave speed
     if (SL > 0):
-        FluxL = np.array([AL*uL, AL*uL**2 + config.g*hL*AL])
+        FluxL = np.array([AL*uL, AL*uL**2 + g*hL*AL])
         Flux = FluxL - 0.5*VNC
     elif (SR < 0):
-        FluxR = np.array([AR*uR, AR*uR**2 + config.g*hR*AR])
+        FluxR = np.array([AR*uR, AR*uR**2 + g*hR*AR])
         Flux = FluxR + 0.5*VNC;
     elif (SL < 0) and (SR > 0):
-        FluxL = np.array([AL*uL, AL*uL**2 + config.g*hL*AL])
-        FluxR = np.array([AR*uR, AR*uR**2 + config.g*hR*AR])
+        FluxL = np.array([AL*uL, AL*uL**2 + g*hL*AL])
+        FluxR = np.array([AR*uR, AR*uR**2 + g*hR*AR])
         FluxHLL = (FluxL*SR - FluxR*SL + SL*SR*(UR - UL))/(SR-SL)
         # # # Check HLL values for steady state case
         # print('HLL = ', FluxHLL)
