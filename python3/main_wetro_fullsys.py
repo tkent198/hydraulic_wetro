@@ -93,6 +93,7 @@ LR3 = config.LR3
 LR11 = config.LR11
 LR22 = config.LR22
 tr = config.tr
+Nk = config.Nk
 s_r = config.s_r
 s_m = config.s_m
 dbds = config.dbds
@@ -103,8 +104,8 @@ BC = config.BC
 
 ## set up grid
 L=LR3 #length of domain
-Nk=25*L #number of gridcells (excluding ghost)
-Nk = int(Nk)
+# Nk=25*L #number of gridcells (excluding ghost)
+# Nk = int(Nk)
 Nf=Nk+1 #number of nodes
 Kk=L/Nk #length of cell
 
