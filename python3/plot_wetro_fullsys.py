@@ -20,7 +20,7 @@ import matplotlib.gridspec as gs
 ##################################################################
 # CUSTOM MODULES REQUIRED
 ##################################################################
-from cross_sections import xsec_hAs, xsec_Ahs, plot_xsec_hAs
+from cross_sections_local import xsec_hAs, xsec_Ahs, plot_xsec_hAs
 
 ##################################################################
 # IMPORT PARAMETERS FROM CONFIGURATION FILE
@@ -45,6 +45,7 @@ LR3 = config.LR3
 LR11 = config.LR11
 LR22 = config.LR22
 tr = config.tr
+Nk = config.Nk
 s_r = config.s_r
 s_m = config.s_m
 dbds = config.dbds
@@ -78,8 +79,8 @@ except OSError as exception:
 ##################################################################
 
 L=LR3 #length of domain
-Nk=25*L #number of gridcells (excluding ghost)
-Nk = int(Nk)
+# Nk=25*L #number of gridcells (excluding ghost)
+# Nk = int(Nk)
 Nf=Nk+1 #number of nodes
 Kk=L/Nk #length of cell
 
@@ -282,7 +283,7 @@ while tn <= tmax:
     A =  U_array[0,:,T]
     Au = U_array[1,:,T]
 
-    # plt.ion() ## Note this correction
+    # plt.ion() ##
 
     # fig, axes = plt.subplots(3, 4, figsize=(13,7))#, constrained_layout=True)
 
@@ -398,8 +399,9 @@ while tn <= tmax:
 
     plt.tight_layout(pad=0.2, w_pad=0.01, h_pad=0.01)
 
-    plt.show()
-    plt.pause(0.1)
+    plt.show(block=False)
+    plt.pause(0.01)
+    plt.close()
 
     tn += dtmeasure
     T += 1
