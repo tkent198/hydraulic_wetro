@@ -55,6 +55,7 @@ LR3 = 5.2 # total length of channel
 LR11 = 3.6 # transition zone from fp to c [LR11, LR1]
 LR22 = 4.4 # transition zone from c to fp [LR2, LR22]
 tr = 50 # severity of transition
+Nk = int(25*LR3) # number of cells on computational mesh (25 times the domain length)
 
 ### coupling locations
 s_r = 0.932 #reservoir influx loc

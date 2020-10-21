@@ -26,13 +26,12 @@ tana = hf/wf # flood plain angle
 LR1 = 3.4 # length upto city region
 LR2 = 3.8 # length from end of city region
 LR3 = 4.2 # total length of channel
-
 s_r = 0.932 #reservoir influx loc
 s_m = 2.038 #moor influx loc
-
 LR11 = 3.4 # transition zone from fp to c [LR11, LR1]
 LR22 = 3.8 # transition zone from c to fp [LR2, LR22]
 tr = 50 # severity of transition
+Nk = int(25*LR3) # number of cells on computational mesh (25 times the domain length)
 
 dbds = -0.01 # mean slope river bed
 
@@ -41,7 +40,7 @@ g = 9.81     # acceleration of gravity
 Cm = 0.02    # Manning coefficient
 cfl = 0.5 # CFL number for stable time-stepping
 Neq = 2 # U = (A, Au)
-eta = 0.0
+eta = 0.0 #amplitude of Gaussian pulse for floodwave
 
 # INITIAL and BOUNDARY CONDITIONS
 # Periodic BC = 1
