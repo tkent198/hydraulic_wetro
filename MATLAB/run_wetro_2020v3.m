@@ -424,6 +424,8 @@ while (tijd  <= Tend) % All simple explicit time stepping
         case 1 %Randomised rainfall 
             while (tijd >= tunit)
                 
+                datetime
+                
                 ncc = ncc+1;
                 tunit  = tunit+TimeUnit;
                 trand1 = rand;
@@ -482,6 +484,8 @@ while (tijd  <= Tend) % All simple explicit time stepping
         case 2 % using saved rain 
             
             while (tijd >= tunit)
+                
+                datetime
                 
                 ncc = ncc+1;
                 tunit  = tunit+TimeUnit;
