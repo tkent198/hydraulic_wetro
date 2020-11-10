@@ -37,6 +37,7 @@ Rainfall is supplied randomly in space at four locations (reservoir, moor, reser
 Wetropolis' design is based on simulations of a one-dimensional numerical model of the dynamics that uses a kinematic approximation to describe the river flow and a depth-averaged nonlinear diffusion equation for the groundwater cell; in the numerical model, a stochastic rainfall generator mimics the Galton boards to determine the amount and location of rain per wd.  In order to create an extreme flood event in Wetropolis once every 5 to 10 minutes on average instead of, say, once every 100 to 200 years on average (as in reality), this preliminary modelling determined the length of the Wetropolis day to be 10s with a corresponding return period of (256/7) x 10s = 6:06min. Thus, Wetropolis is able to demonstrate random extreme rainfall and flood events in a physical model on reduced spatial and temporal scales (see Bokhove et al. (2020) for more details).
 
 A working document with more background and theory, including the governing equations and numerics of Wetropolis, is found [here](Wetropolis_Au_model.pdf).
+A summary of this work was presented at the Leeds Institute for Fluid Dynamics ECR webinar in October 2020 -- the slides can be found [here](LIFD_oct2020.pdf).
 
 
 ### Taster
