@@ -36,21 +36,23 @@ Rainfall is supplied randomly in space at four locations (reservoir, moor, reser
 
 Wetropolis' design is based on simulations of a one-dimensional numerical model of the dynamics that uses a kinematic approximation to describe the river flow and a depth-averaged nonlinear diffusion equation for the groundwater cell; in the numerical model, a stochastic rainfall generator mimics the Galton boards to determine the amount and location of rain per wd.  In order to create an extreme flood event in Wetropolis once every 5 to 10 minutes on average instead of, say, once every 100 to 200 years on average (as in reality), this preliminary modelling determined the length of the Wetropolis day to be 10s with a corresponding return period of (256/7) x 10s = 6:06min. Thus, Wetropolis is able to demonstrate random extreme rainfall and flood events in a physical model on reduced spatial and temporal scales (see Bokhove et al. (2020) for more details).
 
-A working document with more background and theory, including the governing equations and numerics of Wetropolis, is found [here](Wetropolis_Au_model.pdf).
+A working document with more background and theory, including the governing equations and numerics of Wetropolis' dynamics, is found [here](Wetropolis_Au_modelv2.pdf).
 A summary of this work was presented at the Leeds Institute for Fluid Dynamics ECR webinar in October 2020 -- the slides can be found [here](LIFD_oct2020.pdf).
 
 
 ### Taster
-*Preliminary test:* set up the channel geometry (see [pdf](Wetropolis_Au_model.pdf)), initialised with a constant depth and kinematic velocity. The time-dependent left boundary sends a Gaussian pulse into the domain which travels down the channel and floods the plains and city area. This 'floodwave' passes out of the domain and river levels recede.
+*Preliminary test:* set up the channel geometry (see [pdf](Wetropolis_Au_modelv2.pdf)), initialised with a constant depth and kinematic velocity. The time-dependent left boundary sends a Gaussian pulse into the domain which travels down the channel and floods the plains and city area. This 'floodwave' passes out of the domain and river levels recede.
 
 ![floodwave](MATLAB/mov/vid_Nk_105_tmax_100.gif)
 
-Top-left: water depth h [metres] as a function of the along-channel coordinate s [m]. The red shaded area denotes the city area. Top-right: Discharge Au [m^3 / s] along the channel s [m]. Bottom-left: cross-sectional slice at s = 1.96m (floodplain; see vertical dashed line in top-left panel). Bottom-right: cross-sectional slice at s = 3.56m (city area; see second vertical dashed line in top-left panel). Time [s] is indicated in the bottom panels; recall one 'Wetropolis day' (wd) is 10s. Channel length L = 4.21m. Simulation details: space-FV/DGFEM discretisation (Nk=105 elements) -- more details [here](Wetropolis_Au_model.pdf) -- and explicit forward Euler in time; run script ```AuNCP_wetro0.m```.
+Top-left: water depth h [metres] as a function of the along-channel coordinate s [m]. The red shaded area denotes the city area. Top-right: Discharge Au [m^3 / s] along the channel s [m]. Bottom-left: cross-sectional slice at s = 1.96m (floodplain; see vertical dashed line in top-left panel). Bottom-right: cross-sectional slice at s = 3.56m (city area; see second vertical dashed line in top-left panel). Time [s] is indicated in the bottom panels; recall one 'Wetropolis day' (wd) is 10s. Channel length L = 4.21m. Simulation details: space-FV/DGFEM discretisation (Nk=105 elements) -- more details [here](Wetropolis_Au_modelv2.pdf) -- and explicit forward Euler in time; run script ```AuNCP_wetro0.m```.
 
 
 
 ### References
-* Bokhove, O., Hicks, T., Zweers, W., and Kent, T. (2020): Wetropolis extreme rainfall and flood demonstrator: from mathematical design to outreach, *Hydrol. Earth Syst. Sci.*, 24, 2483–2503, [DOI](https://doi.org/10.5194/hess-24-2483-2020).
+* Bokhove, Hicks, Zweers, and Kent (2020): Wetropolis extreme rainfall and flood demonstrator: from mathematical design to outreach, *Hydrol. Earth Syst. Sci.*, 24, 2483–2503, [DOI](https://doi.org/10.5194/hess-24-2483-2020).
+
+* Kent and Bokhove (2020): Wetropolis rainfall and flood demonstrator:  towards real-time simulations with data assimilation, *Tech. report (ongoing)*, [PDF](Wetropolis_Au_modelv2.pdf).
 
 * See also presentations on [OB's page](https://github.com/obokhove/wetropolis20162020/):
   * [Oxford seminar 2016](https://github.com/obokhove/wetropolis20162020/blob/master/WetropolisO2016.pdf)
