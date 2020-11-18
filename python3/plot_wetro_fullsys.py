@@ -350,12 +350,12 @@ while tn <= tmax:
     ax_cr.plot(timevec[:T+1],hcs[1,:T+1], marker = '$2$', linestyle = 'None')
     ax_cr.plot(timevec[:T+1],hcs[2,:T+1], marker = '$3$', linestyle = 'None')
     ax_cr.plot(timevec[:T+1],h_res[:T+1]/10, marker = '$R$', linestyle = 'None')
-    ax_cr.set_ylim([0.005,0.015])
+    ax_cr.set_ylim([0.005,0.02])
 
     ## h(city) time series with flood threshold h_T
     ax_hct.plot([timevec[0], timevec[T]],[hc, hc],'r:')
     ax_hct.plot(timevec[:T+1],hct)
-    ax_hct.set_ylim([0,0.04])
+    ax_hct.set_ylim([0.01,0.03])
 
     ## h(s,t)
     ax_hs.plot([s[fp], s[fp]],[hmin,hmax],'r:')
