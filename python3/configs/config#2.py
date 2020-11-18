@@ -122,6 +122,8 @@ hcm = 0.0 # initial depth
 Pwm = 0.02 # weir height
 Lc = 0.1 # length
 
+### Grid
+Ny = 10 # grid res: no. of cells
 
 ##########################################
 ## Rainfall
