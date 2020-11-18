@@ -26,10 +26,12 @@ File/dir name                   |  Summary
 :--------------------------:|:--------------------------:
 ```main_wetro_tests.py```         | Main run script for test cases
 ```main_wetro_fullsyst.py```    | Main run script for full system: 1st implementation
+```main_wetro_fullsyst_save.py```    | As above but cleaned up and saves data
 ```init_cond.py```              | Initial condition functions
 ```flux_function.py```          | Numerical flux calculation for space discretisation
 ```cross_sections.py```         | Compute cross-sections h(A,s) and A(h,s)
 ```plot_wetro.py```             | Very basic plotting routine for data generated in ```main_wetro_tests.py```
+```plot_wetro_fullsys.py```     | Plotting routine for data generated in ```main_wetro_fullsys_save.py```
 ```plot_wetro_anim.py```             | Plotting routine (animation) for data generated in ```main_wetro_tests.py```
 ```plot_wetro_amp.py```             | Plotting routine (interactive animation) for data generated in ```main_wetro_tests.py```
 ```random_rainfall.py```     | Test script for generating and plotting random rainfall
@@ -54,6 +56,14 @@ This builds on the steady-flow test case: flow is initialised with constant dept
 * run ```main_wetro_tests.py``` with ```config#1.py``` specified as ```spec```. This saves data in the dir  ```/configs/config#1```.
 * run plotting routine ```plot_wetro_amp.py``` again with ```config#1.py``` specified as ```spec```.
 
-### Full system
+### Full system: initial implementation
+Numerical integration of full system: river channel (St Venant PDE), canals (mass ODE), reservoir (mass ODE), and moor (groundwater model PDE), coupled appropriately using hydraulic weir relations.
+
+* run ```main_wetro_fullsys_save.py``` with ```config#2.py``` specified as ```spec```. This saves data in the dir  ```/configs/config#2```.
+* run plotting routine ```plot_wetro_fullsys.py``` again with ```config#2.py``` specified as ```spec```. Loads saved data ```config#2.npz``` and plots the Wetro dashboard (snapshot at t= 990s below).
 
 ![Wetro py3 dashboard](configs/config%232/t990.png)
+
+
+### Next steps: ensemble (in parallel) river component.
+...
