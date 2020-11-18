@@ -12,7 +12,7 @@ Wetropolis v1. Numerical integration of fully-coupled components:
 
 
 SAVEDATA = 1 # 1 to save simulation data
-LOADRAIN = 1 # 1 to load saved rain in config__.npz; 0 to generate random rainfall
+LOADRAIN = 0 # 1 to load saved rain in config__.npz; 0 to generate random rainfall
 
 ##################################################################
 # GENERIC MODULES REQUIRED
@@ -180,7 +180,7 @@ Pwm = config.Pwm # weir height
 Lc = config.Lc # length
 
 ## set up grid
-Ny = 20 #no. cells
+Ny = config.Ny #no. cells
 dy = Ly/Ny #gridsize
 yy = np.linspace(0, Ly, Ny+1) # grid
 hm0 = 0*yy #initial cond
@@ -383,6 +383,7 @@ while tn < tmax:
     # print('dtm: ', dtm)
     # print('dtAu: ', dtAu)
     # print('dt: ', dt)
+    # print(' ')
     #
     # pdb.set_trace()
 
@@ -418,7 +419,7 @@ while tn < tmax:
     hm[1:-1] = hmo[1:-1] + num*alph*g*(0.5*(hmo[2:] + hmo[1:-1])*(hmo[2:] - hmo[1:-1]) - 0.5*(hmo[1:-1] + hmo[:-2])*(hmo[1:-1] - hmo[:-2])) + dt*Rm[1:-1]/(mpor*sigme)
 
     ## wall at last grid point so no flux
-    hm[-1] = hmo[-1]+num*alph*g*(hmo[-2]+hmo[-1])*(hmo[-2]-hmo[-1]) + dt*Rm[-1]/(mpor*sigme)
+    hm[-1] = hmo[-1] + num*alph*g*(hmo[-2] + hmo[-1])*(hmo[-2] - hmo[-1]) + dt*Rm[-1]/(mpor*sigme)
 
     ## outflow
     Qmoor = 0.5*mpor*sigme*wv*alph*g*(hmo[1]**2 - hm[0]**2)/dy

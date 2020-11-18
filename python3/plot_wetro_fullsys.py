@@ -155,7 +155,6 @@ hmmin = 0
 fp = index_fp[60]
 ct = index_city[5]
 
-# plt.ion() ## Note this correction
 
 '''
 while tn <= tmax:
