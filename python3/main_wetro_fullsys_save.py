@@ -36,6 +36,7 @@ from cross_sections_local import xsec_hAs, xsec_Ahs, plot_xsec_hAs
 
 ##################################################################
 # IMPORT PARAMETERS FROM CONFIGURATION FILE AND UNPACK
+# ---- see config file for parameter descriptions ----
 ##################################################################
 
 #spec = importlib.util.spec_from_file_location("config", sys.argv[1])
@@ -465,7 +466,7 @@ while tn < tmax:
     if (BC == 1): # periodic NOT UPDATED
 
         #UU = U - dt*(Pp(:,2:Nk+1) - Pm(:,1:Nk))./Kk + dt*S # NOTE: not updated
-        print('Error: periodic BCs not programmed')
+        print('Error: periodic BCs not programmed (nor suitable!)')
 
     elif (BC == 2): # neumann
 
