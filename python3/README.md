@@ -60,7 +60,7 @@ This builds on the steady-flow test case: flow is initialised with constant dept
 Numerical integration of full system: river channel (St Venant PDE), canals (mass ODE), reservoir (mass ODE), and moor (groundwater model PDE), coupled appropriately using hydraulic weir relations.
 
 * run ```main_wetro_fullsys_save.py``` with ```config#2.py``` specified as ```spec```. This saves data in the dir  ```/configs/config#2```.
-* run plotting routine ```plot_wetro_fullsys.py``` again with ```config#2.py``` specified as ```spec```. Loads saved data ```config#2.npz``` and plots the Wetro dashboard (snapshot at t= 990s below).
+* run either (i) plotting routine ```plot_wetro_fullsys.py``` or (ii) video maker ```mov_wetro_fullsys.py```) again with ```config#2.py``` specified as ```spec```. Loads saved data ```config#2.npz``` and either (i) plots or (ii) saves a video of the Wetropolis dashboard. Snapshot at t= 990s below.
 
 ![Wetro py3 dashboard](configs/config%232/t990.png)
 
