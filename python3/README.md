@@ -64,6 +64,8 @@ Numerical integration of full system: river channel (St Venant PDE), canals (mas
 
 ![Wetro py3 dashboard](configs/config%232/t990.png)
 
+![Wetro py3 movie](configs/config%232/config%232mov.gif)
+
 
 ### Next steps: ensemble (in parallel) river component.
 
