@@ -156,5 +156,7 @@ timeline = amp.Timeline(timevec, fps=10)
 anim = amp.Animation([hline_block, Auline_block], timeline)
 anim.controls()
 
-# anim.save_gif('images/multiblock')
+fname = dirn+'/simulation'
+anim.save_gif(fname)
+
 plt.show()

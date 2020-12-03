@@ -50,13 +50,18 @@ File/dir name                   |  Summary
 There exists a non-trivial steady-state solution of the St. Venant system: flow initialised with constant depth h (and hence cross-sectional area A) and so-called kinematic velocity u, together with the corresponding kinematic inflow and outflow boundary conditions, is both space- and time-dependent. This test case checks that the space-discretised DG0 (finite-volume) numerical scheme preserves this non-trivial steady state solution numerically. An analytical proof is given in Kent and Bokhove (2020).
 
 * run ```main_wetro_tests.py``` with ```config#0.py``` specified as ```spec```. This saves data in the dir  ```/configs/config#0```.
-* run plotting routine ```plot_wetro_amp.py```, again with ```config#0.py``` specified as ```spec```.
+* run plotting routine ```plot_wetro_amp.py```, again with ```config#0.py``` specified as ```spec```. This produces an interactive plot and saves the output (below) as a gif.
+
+![Test case 0 movie](configs/config%230/simulation.gif)
+
 
 ### Flood wave test case
 This builds on the steady-flow test case: flow is initialised with constant depth h (and hence cross-sectional area A) and kinematic velocity u; at the left (inflow) boundary, a time-dependent Gaussian pulse travels into the domain and floods the plains and city area. This 'floodwave' passes out of the domain and river levels recede to leave the steady flow solution.
 
 * run ```main_wetro_tests.py``` with ```config#1.py``` specified as ```spec```. This saves data in the dir  ```/configs/config#1```.
-* run plotting routine ```plot_wetro_amp.py``` again with ```config#1.py``` specified as ```spec```.
+* run plotting routine ```plot_wetro_amp.py``` again with ```config#1.py``` specified as ```spec```. This produces an interactive plot and saves the output (below) as a gif.
+
+![Test case 1 movie](configs/config%231/simulation.gif)
 
 ### Full system: initial implementation
 Numerical integration of full system: river channel (St Venant PDE), canals (mass ODE), reservoir (mass ODE), and moor (groundwater model PDE), coupled appropriately using hydraulic weir relations.
