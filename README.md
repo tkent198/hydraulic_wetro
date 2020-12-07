@@ -88,7 +88,10 @@ File name                   |  Summary
 
 ### Python
 
-File/dir name                   |  Summary
+See separate [Python page](https://github.com/tkent198/hydraulic_wetro/tree/master/python3).
+Note that OB's original design files were in Matlab, which have been developed further by TK as documented on this page; to increase accessibility, all further developments are in Python3.
+
+<!-- File/dir name                   |  Summary
 :--------------------------:|:--------------------------:
 ```main_wetro_run.py```         | Main run script for initial test case
 ```main_wetro_fullsyst.py```    | Main run script for full system: 1st implementation
@@ -100,7 +103,7 @@ File/dir name                   |  Summary
 ```/configs```                  | Dir for config files:
 ```/configs/config#0.py``` etc. | Parameters for steady state test case
 ```/configs/config#1.py``` etc. | Parameters for flood wave test case
-```/configs/config#2.py``` etc. | Parameters for full system v1
+```/configs/config#2.py``` etc. | Parameters for full system v1 -->
 
 
 ## Preliminary simulations
