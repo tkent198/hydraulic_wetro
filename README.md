@@ -89,7 +89,7 @@ File name                   |  Summary
 ### Python
 
 See separate [Python page](https://github.com/tkent198/hydraulic_wetro/tree/master/python3).
-Note that OB's original design files were in Matlab, which have been developed further by TK as documented on this page; to increase accessibility, all further developments are in Python3.
+Note that OB's original design files were in Matlab, which have been developed further by TK as documented on this page; to increase accessibility, all further developments beyond the preliminary simulations below are in Python3.
 
 <!-- File/dir name                   |  Summary
 :--------------------------:|:--------------------------:
