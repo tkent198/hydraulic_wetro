@@ -69,6 +69,7 @@ Numerical integration of full system: river channel (St Venant PDE), canals (mas
 * run ```main_wetro_fullsys_save.py``` with ```config#2.py``` specified as ```spec```. This saves data in the dir  ```/configs/config#2```.
 * run either (i) plotting routine ```plot_wetro_fullsys.py``` or (ii) video maker ```mov_wetro_fullsys.py```) again with ```config#2.py``` specified as ```spec```. Loads saved data ```config#2.npz``` and either (i) plots or (ii) saves a video of the Wetropolis dashboard. Snapshot at t= 990s above; animated gif below.
 
+*NOTE: ```mov_wetro_fullsys.py``` requires the Python movie writer ```ffmpeg```. [Conda installation](https://anaconda.org/conda-forge/ffmpeg) is easiest; alternatively try [pip install](https://pypi.org/project/ffmpeg-python/) from terminal.*
 
 ![Wetro py3 movie](configs/config%232/config%232movlarge.gif)
 
