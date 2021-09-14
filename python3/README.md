@@ -73,6 +73,17 @@ Numerical integration of full system: river channel (St Venant PDE), canals (mas
 
 ![Wetro py3 movie](configs/config%232/config%232movlarge.gif)
 
+Panel description: from top left to bottom right.
+* Rainfall amount (rate), as a function of time, in the reservoir (orange R), moor (blue M), and both (res+moor; green &). Possible amounts are (0,1,2,4,8,9,18)r_0 where r_0 is a unit rainfall rate with probabilities given in the pdf (see Bokhove et al. 2020 for more details).
+* Sample pdf of daily rainfall (time-dependent blue bars). The theoretical pdf is denoted by the black spots.
+* River flow Au(s,t) along the channel s. The vertical black dotted lines correspond to the reservoir, moor, and canal inflows at s = 0.932m, 2.038m, and 3.858m, respectively. Note the jumps after the inflows.
+* The water level h_m in the moor, as a function spatial moor coordinate y and time t, determined by a groundwater (nonlinear diffusion) model. The time-dependent left boundary is coupled to the river and canal.  Right boundary: solid wall. Rainfall is spatially uniform.
+* Canal (1,2,3) and reservoir (R) levels as a function of time.
+* Water depth h(s,t) along the channel s. The vertical black dotted lines correspond to the reservoir, moor, and canal inflows at s = 0.932m, 2.038m, and 3.858m, respectively. The red shaded area denotes the city region. The vertical red dotted lines are the locations of the cross-channel profiles in the panels below.
+* Stage-discharge (h-Q) relationship in the city region. Black upward-pointing symbols denote rising water level; blue downward-pointing symbols denote falling water level.
+* River level time series (blue) in the city region downstream of the canal inflow. The threshold for flooding is 0.02m (horizontal red dotted line).
+* Cross-channel snapshots of river levels just downstream of the moor inflow (floodplain; corresponding to the left dotted red line in the above panel).
+* Cross-channel snapshots of river levels just downstream of the canal inflow (city; ; corresponding to the right dotted red line in the above panel).
 
 ### Next steps: ensemble (in parallel) river component.
 
